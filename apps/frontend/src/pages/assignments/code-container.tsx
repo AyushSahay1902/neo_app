@@ -1,103 +1,107 @@
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import sdk from "@stackblitz/sdk";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
-function App() {
-  useEffect(() => {
-    const project = {
-      files: {
-        "index.html": '<div id="root"></div>',
-        "index.js": `
-          import React from 'react';
-          import ReactDOM from 'react-dom';
-          import App from './App';
+interface CodeContainerProps {
+  project: {
+    id?: string;
+    files: { [key: string]: string };
+    title: string;
+    description: string;
+    dependencies: { [key: string]: string };
+    openFile?: string;
+    height?: number;
+    width?: string;
+    initScripts?: string;
+  };
+}
 
-          ReactDOM.render(<App />, document.getElementById('root'));
-        `,
-        "App.js": `
-          import React from 'react';
+function CodeContainer({ project }: CodeContainerProps) {
+  const { toast } = useToast();
+  const containerRef = useRef<any>(null);
 
-          function App() {
-            return <h1>Hello from StackBlitz!</h1>;
-          }
-
-          export default App;
-        `,
-        "package.json": JSON.stringify({
-          dependencies: {
-            react: "^17.0.2",
-            "react-dom": "^17.0.2",
-          },
-        }),
+  const _embedSDK = async () => {
+    return sdk.embedProject(
+      containerRef.current,
+      {
+        files: project.files,
+        template: "create-react-app" as const,
+        title: project.title ?? `My First Docs!`,
+        description:
+          project.description ?? `This is an example of my first doc!`,
       },
-      title: "React Project",
-      description: "A simple React project",
-      template: "create-react-app",
-    };
+      {
+        openFile: project?.openFile ?? "README.md",
+        height: project?.height ?? 800,
+        width: project.width ?? "100%",
+        startScript: project.initScripts,
+      }
+    );
+  };
 
+  useEffect(() => {
+    _embedSDK();
+  }, [project]);
+
+  const onClickSave = async () => {
     try {
-      sdk.embedProject("embed-container", project);
-    } catch (error) {
-      console.error("Error embedding project:", error);
-    }
-  }, []);
-
-  const handleSubmit = async () => {
-    const iframe = document.getElementById(
-      "embed-container"
-    ) as HTMLIFrameElement;
-
-    if (!iframe) {
-      console.error("Iframe not found");
-      return;
-    }
-
-    try {
+      const iframe = document.getElementById(
+        "embed-container"
+      ) as HTMLIFrameElement;
       const vm = await sdk.connect(iframe);
-      const files = await vm.getFsSnapshot();
+      const files: any = await vm.getFsSnapshot();
 
-      console.log(files);
+      await saveToBucket(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      toast({
+        title: "Error",
+        description: "Failed to retrieve your code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
+  const saveToBucket = async (files: { [key: string]: string }) => {
+    try {
       const response = await fetch(
-        "http://localhost:3000/api/assignments/create",
+        "http://localhost:3000/api/assignments/save",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ files }),
+          body: JSON.stringify({ id: project.title, files }),
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Your code has been saved to MinIO via API.",
+        });
+      } else {
+        throw new Error("Failed to save the code");
       }
-
-      const result = await response.json();
-      console.log("Assessment submitted successfully:", result);
     } catch (error) {
-      console.error("Error during submission:", error);
+      console.error("Error saving code via API:", error);
+      toast({
+        title: "Error",
+        description:
+          "Failed to save your code to MinIO via API. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <div className="App container mx-auto h-full flex flex-col justify-center items-center">
-      <header className="App-header">
-        <h1 className="text-4xl font-bold">Stackblitz Assessment</h1>
-      </header>
-      <div
-        className="w-96 h-[80vh] bg-gray-200"
-        id="embed-container"
-        style={{
-          height: "500px",
-          width: "100%",
-        }}
-      ></div>
-      <Button onClick={handleSubmit} className="m-10">
-        Submit Assessment
-      </Button>
-    </div>
+    <>
+      <div id="embed-container" ref={containerRef}></div>
+
+      <Button onClick={onClickSave}>Save Code</Button>
+    </>
   );
 }
 
-export default App;
+export default CodeContainer;
