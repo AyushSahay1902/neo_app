@@ -1,5 +1,5 @@
 {
-  "name": "neo_demo_app",
+  "name": "neo_app",
   "private": true,
   "scripts": {
     "build": "turbo build",

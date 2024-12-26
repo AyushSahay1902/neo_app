@@ -1955,6 +1955,21 @@ fraction.js@^4.3.7:
   resolved "https://registry.npmjs.org/fraction.js/-/fraction.js-4.3.7.tgz"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
 
+"frontend@file:D:\\projects_kalvium\\neo_demo_app\\apps\\neo_app":
+  version "0.0.0"
+  resolved "file:apps/neo_app"
+  dependencies:
+    "@radix-ui/react-slot" "^1.1.1"
+    "@stackblitz/sdk" "^1.11.0"
+    "@uiw/react-stackblitz" "^1.0.6"
+    class-variance-authority "^0.7.1"
+    clsx "^2.1.1"
+    lucide-react "^0.469.0"
+    react "^18.3.1"
+    react-dom "^18.3.1"
+    tailwind-merge "^2.6.0"
+    tailwindcss-animate "^1.0.7"
+
 fs-extra@^10.1.0:
   version "10.1.0"
   resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-10.1.0.tgz"
@@ -2870,21 +2885,6 @@ natural-compare@^1.4.0:
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-"neo_app@file:D:\\projects_kalvium\\neo_demo_app\\apps\\neo_app":
-  version "0.0.0"
-  resolved "file:apps/neo_app"
-  dependencies:
-    "@radix-ui/react-slot" "^1.1.1"
-    "@stackblitz/sdk" "^1.11.0"
-    "@uiw/react-stackblitz" "^1.0.6"
-    class-variance-authority "^0.7.1"
-    clsx "^2.1.1"
-    lucide-react "^0.469.0"
-    react "^18.3.1"
-    react-dom "^18.3.1"
-    tailwind-merge "^2.6.0"
-    tailwindcss-animate "^1.0.7"
-
 neo-async@^2.6.2:
   version "2.6.2"
   resolved "https://registry.npmjs.org/neo-async/-/neo-async-2.6.2.tgz"
@@ -3482,11 +3482,11 @@ resolve@^1.1.7:
     supports-preserve-symlinks-flag "^1.0.0"
 
 resolve@^1.12.0:
-  version "2.0.0-next.5"
-  resolved "https://registry.npmjs.org/resolve/-/resolve-2.0.0-next.5.tgz"
-  integrity sha512-U7WjGVG9sH8tvjW5SmGbQuui75FiyjAX72HX15DwBBwF9dNiQZRQAg9nnPhYy+TUnE0+VcrttuvNI8oSxZcocA==
+  version "1.22.10"
+  resolved "https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz"
+  integrity sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==
   dependencies:
-    is-core-module "^2.13.0"
+    is-core-module "^2.16.0"
     path-parse "^1.0.7"
     supports-preserve-symlinks-flag "^1.0.0"
 
