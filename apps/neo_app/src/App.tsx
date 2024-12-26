@@ -58,13 +58,16 @@ function App() {
 
       console.log(files);
 
-      const response = await fetch("http://localhost:3000/api/assessment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ files }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/assignments/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ files }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);

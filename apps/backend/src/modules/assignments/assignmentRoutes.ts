@@ -8,7 +8,7 @@ router.get("/list", (req, res) => {
 
 router.post("/create", (req, res) => {
   console.log(`Request Body`, req.body);
-  res.send("Created new assignment attempt");
+  res.send({ message: "Assignment created" });
 });
 
 export default router;
