@@ -95,27 +95,32 @@ router.post("/save", async (req, res) => {
   }
 });
 
-// router.post("/edit/:id", async (req, res) => {
-//   try {
-//     const { id, file } = req.body;
-//     const bucketName = "assignments";
-//     const objectName = `assignment-${id}.json`;
-//     const fileContent = JSON.stringify(file, null, 2);
+router.post("/edit/:id", async (req, res) => {
+  try {
+    const { id, file } = req.body;
+    const bucketName = "assignments";
+    const objectName = `assignment-${id}.json`;
+    const fileContent = JSON.stringify(file, null, 2);
 
-//     const stream = minioClient.listObjects(bucketName, "", true);
-//     stream.on("data", (obj) => {
-//     if (obj.name) { // Ensure name exists
-//     objectList.push({
-//       name: obj.name,
-//       lastModified: obj.lastModified,
-//       etag: obj.etag,
-//       size: obj.size,
-//     });
-//   }
-// });
-//   } catch (error) {
-//     console.error(`Error updating assignment: ${error}`);
-//     res.status(500).send({ message: "Error updating assignment" });
-//   }
-// });
+    const stream = await minioClient.listObjects(bucketName, "", true);
+    let objectExists = false;
+    stream.on("data", (obj: ObjectInfo) => {
+      if (obj.name === objectName) {
+        objectExists = true;
+      }
+    });
+
+    stream.on("end", async () => {
+      if (objectExists) {
+        await minioClient.putObject(bucketName, objectName, fileContent);
+        res.status(200).send({ message: "Assignment updated" });
+      } else {
+        res.status(404).send({ message: "Assignment not found" });
+      }
+    });
+  } catch (error) {
+    console.error(`Error updating assignment: ${error}`);
+    res.status(500).send({ message: "Error updating assignment" });
+  }
+});
 export default router;
