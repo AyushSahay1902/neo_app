@@ -5,13 +5,12 @@ import Register from "./pages/Register";
 import AuthLayout from "./layouts/AuthLayout";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
-import Assignments from "./pages/assignments/assignments-list";
-import AssignmentAttempts from "./pages/assignment-attempts";
-import AssignmentDetailPage from "./pages/assignments/assignment-detail-page";
+import Assignments from "./pages/assignments/assignment-list";
+import AssignmentAttempts from "./pages/assignment-attempt";
+import AssignmentDetailPage from "./pages/assignments/assignment-detail";
 import NewAssignment from "./pages/assignments/new-assignment";
-import Templates from "./pages/template/templates-list";
-import TemplateDetailPage from "./pages/template/template-detail-page";
-import NewTemplate from "./pages/template/new-template";
+import CreateTemplate from "./pages/templates/CreateTemplate";
+import TemplatesList from "./pages/templates/GetTemplates";
 
 function App() {
   return (
@@ -23,9 +22,9 @@ function App() {
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/templates/:id" element={<TemplateDetailPage />} />
-          <Route path="/templates/new" element={<NewTemplate />} />
+          <Route path="/templates" element={<TemplatesList />} />
+          {/* <Route path="/templates/:id" element={<TemplateDetailPage />} /> */}
+          <Route path="/templates/new" element={<CreateTemplate />} />
           <Route path="/assignments" element={<Assignments />} />
           <Route path="/assignments/new" element={<NewAssignment />} />
           <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
@@ -39,4 +38,3 @@ function App() {
 }
 
 export default App;
-S;

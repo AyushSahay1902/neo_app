@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import sdk from "@stackblitz/sdk";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-mobile";
 
 interface CodeContainerProps {
   project: {
@@ -18,7 +18,7 @@ interface CodeContainerProps {
 }
 
 function CodeContainer({ project }: CodeContainerProps) {
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const containerRef = useRef<any>(null);
 
   const _embedSDK = async () => {
@@ -55,11 +55,11 @@ function CodeContainer({ project }: CodeContainerProps) {
       await saveToBucket(files);
     } catch (error) {
       console.error("Error getting files:", error);
-      toast({
-        title: "Error",
-        description: "Failed to retrieve your code. Please try again.",
-        variant: "destructive",
-      });
+      // toast({
+      //   title: "Error",
+      //   description: "Failed to retrieve your code. Please try again.",
+      //   variant: "destructive",
+      // });
     }
   };
 
@@ -77,21 +77,21 @@ function CodeContainer({ project }: CodeContainerProps) {
       );
 
       if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Your code has been saved to MinIO via API.",
-        });
+        // toast({
+        //   title: "Success",
+        //   description: "Your code has been saved to MinIO via API.",
+        // });
       } else {
         throw new Error("Failed to save the code");
       }
     } catch (error) {
       console.error("Error saving code via API:", error);
-      toast({
-        title: "Error",
-        description:
-          "Failed to save your code to MinIO via API. Please try again.",
-        variant: "destructive",
-      });
+      // toast({
+      //   title: "Error",
+      //   description:
+      //     "Failed to save your code to MinIO via API. Please try again.",
+      //   variant: "destructive",
+      // });
     }
   };
 
