@@ -17,7 +17,7 @@ type BucketItem = {
 
 const router = express.Router();
 
-router.get("/list", (req, res) => {
+router.get("/listAssignment", (req, res) => {
   try {
     const bucketName = "assignments";
     const objectList: BucketItem[] = [];
@@ -50,7 +50,7 @@ router.get("/list", (req, res) => {
   }
 });
 
-router.get("/list/:id", async (req, res) => {
+router.get("/getAssignment/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const bucketName = "assignments";
@@ -80,7 +80,7 @@ router.get("/list/:id", async (req, res) => {
   }
 });
 
-router.post("/save", async (req, res) => {
+router.post("/createAssignment", async (req, res) => {
   try {
     const { id, file } = req.body;
     const bucketName = "assignments";
@@ -95,7 +95,7 @@ router.post("/save", async (req, res) => {
   }
 });
 
-router.post("/edit/:id", async (req, res) => {
+router.post("/editAssignment/:id", async (req, res) => {
   try {
     const { id, file } = req.body;
     const bucketName = "assignments";
