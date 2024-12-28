@@ -1,5 +1,8 @@
 import express from "express";
 import minioClient from "../../utils/minioClient";
+import db from "../../db/index";
+import { assignments } from "../../db/schema"; // Import your Drizzle schema
+import type { Request, Response } from "express";
 
 interface ObjectInfo {
   name?: string;
@@ -17,36 +20,68 @@ type BucketItem = {
 
 const router = express.Router();
 
-router.get("/listAssignment", (req, res) => {
-  try {
-    const bucketName = "assignments";
+/**
+ * Helper function to fetch all objects from MinIO bucket.
+ */
+const getBucketObjects = async (bucketName: string): Promise<BucketItem[]> => {
+  return new Promise((resolve, reject) => {
     const objectList: BucketItem[] = [];
-    const stream = minioClient.listObjects(bucketName, "", true);
+    const stream = minioClient.listObjectsV2(bucketName, "", true);
+
     stream.on("data", (obj: ObjectInfo) => {
       if (obj.name) {
-        const item: BucketItem = {
-          name: obj.name, // We know name is defined here due to the if check
+        objectList.push({
+          name: obj.name,
           lastModified: obj.lastModified,
           etag: obj.etag,
           size: obj.size,
-        };
-        objectList.push(item);
+        });
       }
     });
 
-    stream.on("end", () => {
-      res.status(200).send({
-        message: "List of assignments fetched successfully",
-        data: objectList,
-      });
+    stream.on("end", () => resolve(objectList));
+    stream.on("error", (error) => reject(error));
+  });
+};
+
+/**
+ * Route to list assignments.
+ */
+router.get("/listAssignment", async (req: Request, res: Response) => {
+  try {
+    // Step 1: Fetch assignment data from the database
+    const assignmentList = await db.select().from(assignments).execute();
+
+    // Step 2: Fetch all objects from the MinIO bucket
+    const bucketName = "assignments";
+    const objectList = await getBucketObjects(bucketName);
+
+    // Step 3: Combine DB and bucket data
+    const combinedList = assignmentList.map((assignment) => {
+      const bucketFile = objectList.find(
+        (file) => file.name === assignment.bucketUrl
+      );
+      return {
+        id: assignment.id,
+        title: assignment.title,
+        description: assignment.description,
+        templateId: assignment.templateId,
+        bucketUrl: assignment.bucketUrl,
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+        bucketFileDetails: bucketFile || null, // Add MinIO file details if available
+      };
     });
-    stream.on("error", (error) => {
-      console.error("Error fetching objects from MinIO bucket:", error);
-      res.status(500).send({ message: "Error fetching assignments" });
+
+    res.status(200).send({
+      message: "List of assignments fetched successfully",
+      data: combinedList,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error fetching assignments: ${error}`);
-    res.status(500).send({ message: "Error fetching assignments" });
+    res
+      .status(500)
+      .send({ message: "Error fetching assignments", error: error.message });
   }
 });
 
