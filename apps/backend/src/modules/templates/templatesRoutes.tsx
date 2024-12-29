@@ -1,72 +1,48 @@
 import express from "express";
+import type { Request, Response } from "express";
 import minioClient from "../../utils/minioClient";
-
-interface Template {
-  name: string;
-  size: number;
-  lastModified: Date;
-}
+import { templates } from "../../db/schema";
+import db from "../../db/index";
 
 const router = express.Router();
 
-router.get("/get-templates", async (req, res) => {
+router.post("/createTemplate", async (req: Request, res: Response) => {
   try {
-    const bucketName = "templates";
-    const templates: Array<{ name: string; size: number; lastModified: Date }> =
-      [];
+    const { templateName, templateContent, description } = req.body;
 
-    // Create a stream to list objects in the bucket
-    const stream = minioClient.listObjects(bucketName, "", true);
+    if (!templateName || !templateContent) {
+      return res.status(400).send("Template name and content are required.");
+    }
 
-    stream.on("data", (obj) => {
-      // Push each object into the array
-      templates.push({
-        name: obj.name || "unknown",
-        size: obj.size ?? 0,
-        lastModified: obj.lastModified ?? new Date(0),
-      });
-    });
-
-    stream.on("end", () => {
-      // Send the collected templates once the stream ends
-      res.status(200).send({
-        message: "Templates fetched successfully",
-        data: templates,
-      });
-    });
-
-    stream.on("error", (error) => {
-      console.error("Error fetching objects from MinIO bucket:", error);
-      res.status(500).send({ message: "Error fetching templates" });
-    });
-  } catch (error) {
-    console.error(`Error fetching templates: ${error}`);
-    res.status(500).send({ message: "Error fetching templates" });
-  }
-});
-
-router.post("/create-template", async (req, res) => {
-  try {
-    const { name, data } = req.body;
-    const bucketName = "templates";
-
-    // Create a stream to upload the template
-    const uploadedObjectInfo = await minioClient.putObject(
-      bucketName,
-      name,
-      data
+    // Upload the template to MinIO
+    await minioClient.putObject(
+      "templates", // Bucket name
+      templateName, // File name
+      JSON.stringify(templateContent) // Content
     );
 
-    // Check if the upload was successful by examining the returned information
-    if (uploadedObjectInfo) {
-      res.status(200).send({ message: "Template created successfully" });
-    } else {
-      res.status(500).send({ message: "Error creating template" });
-    }
-  } catch (error) {
-    console.error(`Error creating template: ${error}`);
-    res.status(500).send({ message: "Error creating template" });
+    // Get the presigned URL for the uploaded template
+    const url = await minioClient.presignedGetObject("templates", templateName);
+
+    // Save the template details into the database
+    await db.insert(templates).values({
+      name: templateName,
+      description: description || "", // Optional description
+      bucketUrl: url,
+    });
+
+    // Respond with the URL
+    res.status(200).json({ url });
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).send("An error occurred while creating the template.");
   }
 });
+
+// router.get("getTemplates", async (req, res) => {
+//   try {
+//     //get templates
+//   }
+// });
 
 export default router;
