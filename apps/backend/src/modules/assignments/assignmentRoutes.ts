@@ -121,37 +121,40 @@ router.post("/createAssignment", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/getAssignment/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the ID
+    const assignmentId = parseInt(id);
+    if (isNaN(assignmentId)) {
+      return res.status(400).send({ message: "Invalid assignment ID" });
+    }
+
+    // Fetch the assignment title and URL from the database
+    const assignment = await db
+      .select(assignments.title, assignments.bucketUrl)
+      .from(assignments)
+      .where({ id: assignmentId })
+      .execute();
+
+    // Check if the assignment was found
+    if (assignment.length === 0) {
+      return res.status(404).send({ message: "Assignment not found" });
+    }
+
+    // Return the assignment data
+    res.status(200).send({
+      message: "Assignment fetched successfully",
+      data: assignment[0], // Return the first (and only) result
+    });
+  } catch (error) {
+    console.error(`Error fetching assignment: ${error}`);
+    res.status(500).send({ message: "Error fetching assignment" });
+  }
+});
+
 export default router;
-
-// router.get("/getAssignment/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const bucketName = "assignments";
-//     const objectName = `assignment-${id}.json`;
-
-//     const stream = await minioClient.getObject(bucketName, objectName);
-
-//     let data = "";
-//     stream.on("data", (chunk) => {
-//       data += chunk;
-//     });
-
-//     stream.on("end", () => {
-//       res.status(200).send({
-//         message: "Assignment fetched successfully",
-//         data: JSON.parse(data),
-//       });
-//     });
-
-//     stream.on("error", (error) => {
-//       console.error("Error fetching object from MinIO bucket:", error);
-//       res.status(500).send({ message: "Error fetching assignment" });
-//     });
-//   } catch (error) {
-//     console.error(`Error fetching assignment: ${error}`);
-//     res.status(500).send({ message: "Error fetching assignment" });
-//   }
-// });
 
 // router.post("/editAssignment/:id", async (req, res) => {
 //   try {
