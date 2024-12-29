@@ -89,54 +89,39 @@ router.get("/listAssignment", async (req: Request, res: Response) => {
 
 router.post("/createAssignment", async (req: Request, res: Response) => {
   try {
-    const {
-      title,
-      description,
-      templateId,
-      file,
-    }: {
-      title: string;
-      description: string;
-      templateId: number;
-      file: FileContent;
-    } = req.body;
+    const { title, description, file } = req.body;
 
     const bucketName = "assignments";
-    const objectName = `assignment-${Date.now()}.json`; // Use Date.now() or id generated elsewhere
+    const objectName = `assignment-${title}.json`;
     const fileContent = JSON.stringify(file, null, 2);
 
-    // Upload the file to MinIO
+    // Step 1: Save file to MinIO bucket
     await minioClient.putObject(bucketName, objectName, fileContent);
 
-    // Get the file URL
-    const fileUrl = await minioClient.presignedGetObject(
-      bucketName,
-      objectName
-    );
+    // Generate bucket URL
+    const bucketUrl = `http://127.0.0.1:9090/browser/assignments/${objectName}`;
 
-    // Insert assignment data into the database (exclude id as it is auto-generated)
-    const [newAssignment] = await db
+    // Step 2: Save assignment details to the database
+    const assignment = await db
       .insert(assignments)
       .values({
-        title, // Title of the assignment
-        description, // Description of the assignment
-        templateId, // Reference to the template
-        bucketUrl: fileUrl, // URL of the uploaded file
+        title,
+        description,
+        bucketUrl, // Use the generated bucketUrl here
       })
-      .returning(); // Use returning() to get the inserted row if needed
+      .execute();
 
+    // Return bucket URL in response
+    res.status(201).send({ message: "Assignment created", url: bucketUrl });
+  } catch (error: any) {
+    console.error(`Error creating assignment: ${error}`);
     res
-      .status(200)
-      .send({
-        message: "Assignment saved successfully",
-        fileUrl,
-        newAssignment,
-      });
-  } catch (error) {
-    console.error(`Error saving assignment: ${error}`);
-    res.status(500).send({ message: "Error saving assignment" });
+      .status(500)
+      .send({ message: "Error creating assignment", error: error.message });
   }
 });
+
+export default router;
 
 // router.get("/getAssignment/:id", async (req, res) => {
 //   try {
@@ -196,4 +181,3 @@ router.post("/createAssignment", async (req: Request, res: Response) => {
 //     res.status(500).send({ message: "Error updating assignment" });
 //   }
 // });
-export default router;
