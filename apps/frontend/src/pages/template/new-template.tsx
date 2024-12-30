@@ -11,7 +11,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { templates } from "@/data/templates";
+
 import CodeContainer from "../assignments/code-container";
 import {
   DropdownMenu,
@@ -159,12 +159,9 @@ function NewTemplate() {
               <Label>Template Code</Label>
               <CodeContainer
                 project={{
-                  //id is auto generated
-                  id: "",
                   title: name || "New Template",
                   description: description || "New template description",
-                  files,
-                  dependencies,
+                  stack,
                 }}
               />
             </div>
