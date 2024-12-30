@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import {
   Card,
   CardHeader,
@@ -45,6 +46,25 @@ function TemplatesList() {
     loadTemplates();
   }, []);
 
+  const fetchTemplate = async (id: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/templates/getTemplate/${id}`
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch template: ${response.statusText}`);
+      }
+      const templateData = await response.json();
+      console.log("Template data:", templateData);
+
+      // Navigate to the template view page with fetched data
+      navigate(`/templates/${id}`, { state: { template: templateData } });
+    } catch (error) {
+      console.error("Error fetching template:", error);
+      alert("Failed to fetch the template. Please try again.");
+    }
+  };
+
   if (loading) {
     return <div className="p-6">Loading templates...</div>;
   }
@@ -77,9 +97,7 @@ function TemplatesList() {
               </p>
             </CardContent>
             <div className="flex justify-end m-4">
-              <Button asChild>
-                <Link to={`/templates/${template.id}`}>View</Link>
-              </Button>
+              <Button onClick={() => fetchTemplate(template.id)}>View</Button>
             </div>
           </Card>
         ))}

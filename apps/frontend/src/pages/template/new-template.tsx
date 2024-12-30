@@ -5,6 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardHeader,
   CardTitle,
@@ -13,35 +20,23 @@ import {
 } from "@/components/ui/card";
 
 import CodeContainer from "../assignments/code-container";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { templates, Template } from "@/data/templates"; // Import your templates data
 
 function NewTemplate() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [files, setFiles] = useState<{ [key: string]: string }>({
-    "index.js": "// Your code here",
-  });
-  const [dependencies, setDependencies] = useState<{ [key: string]: string }>(
-    {}
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
   );
-  const [stack, setStack] = useState<string>("Select Tech Stack");
   const navigate = useNavigate();
 
   const saveTemplate = async () => {
     try {
       const newTemplate = {
-        id: name.toLowerCase().replace(/\s+/g, "_"),
-        title: name,
+        name: name.toLowerCase().replace(/\s+/g, "_"),
         description,
-        files,
-        dependencies,
+        files: selectedTemplate?.files || {},
+        dependencies: selectedTemplate?.dependencies || {},
       };
 
       const response = await fetch(
@@ -68,21 +63,16 @@ function NewTemplate() {
     }
   };
 
+  const handleSelectStack = (stackId: string) => {
+    const template = templates.find((template) => template.id === stackId);
+    if (template) {
+      setSelectedTemplate(template);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveTemplate();
-  };
-
-  const updateFiles = (newFiles: { [key: string]: string }) => {
-    setFiles(newFiles);
-  };
-
-  const handleSelectStack = (
-    stackName: string,
-    dependency: { [key: string]: string }
-  ) => {
-    setStack(stackName); // Update the dropdown label with the selected stack
-    setDependencies(dependency); // Update the dependencies with the selected stack
   };
 
   return (
@@ -114,45 +104,23 @@ function NewTemplate() {
               </div>
               <div>
                 <Label htmlFor="dependencies">Tech Stack</Label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full text-left">
-                      {stack} {/* Display selected stack here */}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full">
-                    <DropdownMenuLabel>Available Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleSelectStack("React", { react: "18.2.0" })
-                      }
-                    >
-                      React
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleSelectStack("Next.js", { next: "13.4.0" })
-                      }
-                    >
-                      Next.js
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleSelectStack("Vue.js", { vue: "3.2.0" })
-                      }
-                    >
-                      Vue.js
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        handleSelectStack("Angular", { angular: "15.0.0" })
-                      }
-                    >
-                      Angular
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="space-y-1">
+                  <Select
+                    onValueChange={(value) => handleSelectStack(value)}
+                    defaultValue=""
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Tech Stack" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map((templates) => (
+                        <SelectItem key={templates.id} value={templates.id}>
+                          {templates.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             <div className="mb-6">
@@ -161,12 +129,14 @@ function NewTemplate() {
                 project={{
                   title: name || "New Template",
                   description: description || "New template description",
-                  stack,
+                  stack: selectedTemplate?.id || "Select Tech Stack",
+                  files: selectedTemplate?.files || {},
+                  dependencies: selectedTemplate?.dependencies || {},
                 }}
               />
             </div>
             <CardFooter className="flex justify-end">
-              <Button onClick={handleSubmit}>Save Template</Button>
+              <Button type="submit">Save Template</Button>
             </CardFooter>
           </form>
         </CardContent>
