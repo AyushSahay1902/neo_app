@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet } from 'react-router'
 
 function UnauthLayout() {
   return (
@@ -7,7 +7,8 @@ function UnauthLayout() {
         <Outlet />
       </div>
     </div>
-  );
+  )
 }
 
-export default UnauthLayout;
+export default UnauthLayout
+

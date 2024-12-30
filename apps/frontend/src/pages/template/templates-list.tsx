@@ -1,13 +1,7 @@
-import { Link } from "react-router";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { templates } from "@/data/templates";
+import { Link } from 'react-router'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { templates } from '@/data/templates'
 
 function TemplatesList() {
   return (
@@ -34,14 +28,14 @@ function TemplatesList() {
             </div>
             <div className="flex-1 bg-muted p-6 rounded-r-lg">
               <pre className="text-sm overflow-x-auto">
-                <code>{Object.keys(template.files).join("\n")}</code>
+                <code>{Object.keys(template.files).join('\n')}</code>
               </pre>
             </div>
           </Card>
         ))}
       </div>
     </div>
-  );
+  )
 }
 
-export default TemplatesList;
+export default TemplatesList

@@ -1,30 +1,30 @@
 interface AssignmentProject {
-  id: string;
-  title: string;
-  description: string;
-  files: {
-    [key: string]: string;
-  };
-  dependencies: {
-    [key: string]: string;
-  };
+    id: string;
+    title: string;
+    description: string;
+    files: {
+        [key: string]: string;
+    };
+    dependencies: {
+        [key: string]: string;
+    };
 }
 
 export const assignmentProjects: AssignmentProject[] = [
-  {
-    id: "1",
-    title: "React Counter with Hooks",
-    description: "Create a counter component using the useState hook",
-    files: {
-      "index.html": '<div id="root"></div>',
-      "index.js": `
+    {
+        id: '1',
+        title: 'React Counter with Hooks',
+        description: 'Create a counter component using the useState hook',
+        files: {
+            'index.html': '<div id="root"></div>',
+            'index.js': `
   import React from 'react';
   import ReactDOM from 'react-dom';
   import App from './App';
   
   ReactDOM.render(<App />, document.getElementById('root'));
         `,
-      "App.js": `
+            'App.js': `
   import React from 'react';
   
   function App() {
@@ -40,26 +40,26 @@ export const assignmentProjects: AssignmentProject[] = [
   
   export default App;
         `,
+        },
+        dependencies: {
+            'react': '^17.0.2',
+            'react-dom': '^17.0.2',
+        },
     },
-    dependencies: {
-      react: "^17.0.2",
-      "react-dom": "^17.0.2",
-    },
-  },
-  {
-    id: "2",
-    title: "React Context API",
-    description: "Implement a theme switcher using Context API",
-    files: {
-      "index.html": '<div id="root"></div>',
-      "index.js": `
+    {
+        id: '2',
+        title: 'React Context API',
+        description: 'Implement a theme switcher using Context API',
+        files: {
+            'index.html': '<div id="root"></div>',
+            'index.js': `
   import React from 'react';
   import ReactDOM from 'react-dom';
   import App from './App';
   
   ReactDOM.render(<App />, document.getElementById('root'));
         `,
-      "App.js": `
+            'App.js': `
   import React from 'react';
   
   // TODO: Implement ThemeContext and ThemeProvider
@@ -75,10 +75,11 @@ export const assignmentProjects: AssignmentProject[] = [
   
   export default App;
         `,
+        },
+        dependencies: {
+            'react': '^17.0.2',
+            'react-dom': '^17.0.2',
+        },
     },
-    dependencies: {
-      react: "^17.0.2",
-      "react-dom": "^17.0.2",
-    },
-  },
 ];
+
