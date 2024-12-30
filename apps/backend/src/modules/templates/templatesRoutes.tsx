@@ -28,7 +28,8 @@ router.post("/createTemplate", async (req: Request, res: Response) => {
 
     await minioClient.putObject(bucketName, objectName, filesContent);
 
-    const bucketUrl = `http://127.0.0.1:9090/browser/templates/${objectName}`;
+    // const bucketUrl = `http://127.0.0.1:9090/browser/templates/${objectName}`;
+    const bucketUrl = `${bucketName}/${objectName}`;
 
     await db
       .update(templates)
@@ -67,36 +68,79 @@ router.get("/getTemplates", async (_req: Request, res: Response) => {
   }
 });
 
-// router.post("editTemplate/:id", async (req: Request, res: Response) => {
-//   try{
-//     const { id } = req.params;
-//     const { name, description, files } = req.body;
-//     const bucketName = "templates";
+router.post("/editTemplate/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { files } = req.body;
+    const bucketName = "templates";
 
-//     const [template] = await db
-//       .select({
-//         id: templates.id,
-//         name: templates.name,
-//         description: templates.description,
-//         bucketUrl: templates.bucketUrl,
-//         createdAt: templates.createdAt,
-//         updatedAt: templates.updatedAt,
-//       })
-//       .from(templates)
-//       .where(eq(templates.id, template.id))
-//       .execute();
+    // Fetch the existing template by `id`
+    const [template] = await db
+      .select({
+        id: templates.id,
+        name: templates.name,
+        description: templates.description,
+        bucketUrl: templates.bucketUrl,
+        createdAt: templates.createdAt,
+        updatedAt: templates.updatedAt,
+      })
+      .from(templates)
+      .where(eq(templates.id, Number(id))) // Ensure `id` is a number
+      .execute();
 
-//     if (!template) {
-//       res.status(404).send({ message: "Template not found" });
-//       return;
-//     }
+    if (!template) {
+      res.status(404).send({ message: "Template not found" });
+      return;
+    }
 
-//     const objectName = `${template.name || template.id}.json`;
-//     const filesContent = JSON.stringify(files, null, 2);
+    const objectName = `${template.name || template.id}.json`;
 
-//     await minioClient.putObject(bucketName, objectName, filesContent);
+    const filesContent = JSON.stringify(files, null, 2);
 
-//   }
-// });
+    await minioClient.putObject(bucketName, objectName, filesContent);
+
+    res.status(200).send({ message: "Template files updated successfully" });
+  } catch (error: any) {
+    console.error(`Error updating template files: ${error}`);
+    res
+      .status(500)
+      .send({ message: "Error updating template files", error: error.message });
+  }
+});
+
+router.get("/getTemplate/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const bucketName = "templates";
+
+    // Fetch the existing template by `id`
+    const [template] = await db
+      .select({
+        id: templates.id,
+        name: templates.name,
+        description: templates.description,
+        bucketUrl: templates.bucketUrl,
+        createdAt: templates.createdAt,
+        updatedAt: templates.updatedAt,
+      })
+      .from(templates)
+      .where(eq(templates.id, Number(id))) // Ensure `id` is a number
+      .execute();
+
+    if (!template) {
+      res.status(404).send({ message: "Template not found" });
+      return;
+    }
+
+    const objectName = `${template.name || template.id}.json`;
+    //return the template object from the db
+    res.status(200).send(template);
+  } catch (error: any) {
+    console.error(`Error getting template: ${error}`);
+    res
+      .status(500)
+      .send({ message: "Error getting template", error: error.message });
+  }
+});
 
 export default router;

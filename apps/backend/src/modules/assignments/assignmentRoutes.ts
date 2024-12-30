@@ -1,186 +1,147 @@
 import express from "express";
+import type { Request, Response } from "express";
 import minioClient from "../../utils/minioClient";
 import db from "../../db/index";
 import { assignments } from "../../db/schema";
-import type { Request, Response } from "express";
-
-interface FileContent {
-  [key: string]: any;
-}
-
-type BucketItem = {
-  name: string;
-  lastModified: Date;
-  etag: string;
-  size: number;
-};
+import { eq } from "drizzle-orm";
 
 const router = express.Router();
 
-const getBucketObjects = async (bucketName: string): Promise<BucketItem[]> => {
-  return new Promise((resolve, reject) => {
-    const objectList: BucketItem[] = [];
-    const stream = minioClient.listObjectsV2(bucketName, "", true);
+const bucketName = "assignments";
 
-    stream.on(
-      "data",
-      (obj: {
-        name?: string;
-        lastModified: Date;
-        etag: string;
-        size: number;
-      }) => {
-        if (obj.name) {
-          objectList.push({
-            name: obj.name,
-            lastModified: obj.lastModified,
-            etag: obj.etag,
-            size: obj.size,
-          });
-        }
-      }
-    );
-
-    stream.on("end", () => resolve(objectList));
-    stream.on("error", (error) => reject(error));
-  });
+// Helper function to get assignment by ID
+const getAssignmentById = async (id: number) => {
+  const [assignment] = await db
+    .select({
+      id: assignments.id,
+      title: assignments.title,
+      description: assignments.description,
+      bucketUrl: assignments.bucketUrl,
+      createdAt: assignments.createdAt,
+      updatedAt: assignments.updatedAt,
+    })
+    .from(assignments)
+    .where(eq(assignments.id, id))
+    .execute();
+  return assignment;
 };
 
-/**
- * Route to list assignments.
- */
-router.get("/listAssignment", async (req: Request, res: Response) => {
-  try {
-    // Step 1: Fetch assignment data from the database
-    const assignmentList = await db.select().from(assignments).execute();
-
-    // Step 2: Fetch all objects from the MinIO bucket
-    const bucketName = "assignments";
-    const objectList = await getBucketObjects(bucketName);
-
-    // Step 3: Combine DB and bucket data
-    const combinedList = assignmentList.map((assignment) => {
-      const bucketFile = objectList.find(
-        (file) => file.name === assignment.bucketUrl
-      );
-      return {
-        id: assignment.id,
-        title: assignment.title,
-        description: assignment.description,
-        templateId: assignment.templateId,
-        bucketUrl: assignment.bucketUrl,
-        createdAt: assignment.createdAt,
-        updatedAt: assignment.updatedAt,
-        bucketFileDetails: bucketFile || null, // Add MinIO file details if available
-      };
-    });
-
-    res.status(200).send({
-      message: "List of assignments fetched successfully",
-      data: combinedList,
-    });
-  } catch (error: any) {
-    console.error(`Error fetching assignments: ${error}`);
-    res
-      .status(500)
-      .send({ message: "Error fetching assignments", error: error.message });
-  }
-});
-
+// Route to create an assignment
 router.post("/createAssignment", async (req: Request, res: Response) => {
   try {
     const { title, description, file } = req.body;
 
-    const bucketName = "assignments";
+    // Generate object name and save file content in MinIO
     const objectName = `assignment-${title}.json`;
     const fileContent = JSON.stringify(file, null, 2);
-
-    // Step 1: Save file to MinIO bucket
     await minioClient.putObject(bucketName, objectName, fileContent);
 
-    // Generate bucket URL
-    const bucketUrl = `http://127.0.0.1:9090/browser/assignments/${objectName}`;
-
-    // Step 2: Save assignment details to the database
-    const assignment = await db
+    // Generate MinIO URL and save the assignment in the database
+    const bucketUrl = `${bucketName}/${objectName}`;
+    const [newAssignment] = await db
       .insert(assignments)
       .values({
         title,
         description,
-        bucketUrl, // Use the generated bucketUrl here
+        bucketUrl,
+        updatedAt: new Date(),
+      })
+      .returning({
+        id: assignments.id,
+        title: assignments.title,
       })
       .execute();
 
-    // Return bucket URL in response
-    res.status(201).send({ message: "Assignment created", url: bucketUrl });
+    res.status(201).send({
+      message: "Assignment created successfully",
+      data: {
+        id: newAssignment.id,
+        title: newAssignment.title,
+        url: bucketUrl,
+      },
+    });
   } catch (error: any) {
-    console.error(`Error creating assignment: ${error}`);
+    console.error(`Error creating assignment: ${error.message}`);
     res
       .status(500)
       .send({ message: "Error creating assignment", error: error.message });
   }
 });
 
+// Route to list all assignments
+router.get("/listAssignment", async (req: Request, res: Response) => {
+  try {
+    const allAssignments = await db
+      .select({
+        id: assignments.id,
+        title: assignments.title,
+        description: assignments.description,
+        bucketUrl: assignments.bucketUrl,
+        createdAt: assignments.createdAt,
+        updatedAt: assignments.updatedAt,
+      })
+      .from(assignments)
+      .execute();
+
+    res.status(200).send(allAssignments);
+  } catch (error: any) {
+    console.error(`Error fetching assignments: ${error.message}`);
+    res
+      .status(500)
+      .send({ message: "Error fetching assignments", error: error.message });
+  }
+});
+
+// Route to get a specific assignment by ID
 router.get("/getAssignment/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-
-    // Validate the ID
-    const assignmentId = parseInt(id);
-    if (isNaN(assignmentId)) {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
       return res.status(400).send({ message: "Invalid assignment ID" });
     }
 
-    // Fetch the assignment title and URL from the database
-    const assignment = await db
-      .select(assignments.title, assignments.bucketUrl)
-      .from(assignments)
-      .where({ id: assignmentId })
-      .execute();
-
-    // Check if the assignment was found
-    if (assignment.length === 0) {
+    const assignment = await getAssignmentById(id);
+    if (!assignment) {
       return res.status(404).send({ message: "Assignment not found" });
     }
 
-    // Return the assignment data
     res.status(200).send({
       message: "Assignment fetched successfully",
-      data: assignment[0], // Return the first (and only) result
+      data: assignment,
     });
-  } catch (error) {
-    console.error(`Error fetching assignment: ${error}`);
-    res.status(500).send({ message: "Error fetching assignment" });
+  } catch (error: any) {
+    console.error(`Error fetching assignment: ${error.message}`);
+    res
+      .status(500)
+      .send({ message: "Error fetching assignment", error: error.message });
+  }
+});
+
+// Route to edit assignment files
+router.put("/editAssignment/:id", async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { file } = req.body;
+
+    console.log("file", file);
+
+    const assignment = await getAssignmentById(id);
+    if (!assignment) {
+      return res.status(404).send({ message: "Assignment not found" });
+    }
+
+    const objectName = `assignment-${assignment.title}.json`;
+    const fileContent = JSON.stringify(file, null, 2);
+    await minioClient.putObject(bucketName, objectName, fileContent);
+
+    res.status(200).send({ message: "Assignment files updated successfully" });
+  } catch (error: any) {
+    console.error(`Error updating assignment files: ${error.message}`);
+    res.status(500).send({
+      message: "Error updating assignment files",
+      error: error.message,
+    });
   }
 });
 
 export default router;
-
-// router.post("/editAssignment/:id", async (req, res) => {
-//   try {
-//     const { id, file } = req.body;
-//     const bucketName = "assignments";
-//     const objectName = `assignment-${id}.json`;
-//     const fileContent = JSON.stringify(file, null, 2);
-
-//     const stream = await minioClient.listObjects(bucketName, "", true);
-//     let objectExists = false;
-//     stream.on("data", (obj: ObjectInfo) => {
-//       if (obj.name === objectName) {
-//         objectExists = true;
-//       }
-//     });
-
-//     stream.on("end", async () => {
-//       if (objectExists) {
-//         await minioClient.putObject(bucketName, objectName, fileContent);
-//         res.status(200).send({ message: "Assignment updated" });
-//       } else {
-//         res.status(404).send({ message: "Assignment not found" });
-//       }
-//     });
-//   } catch (error) {
-//     console.error(`Error updating assignment: ${error}`);
-//     res.status(500).send({ message: "Error updating assignment" });
-//   }
-// });
