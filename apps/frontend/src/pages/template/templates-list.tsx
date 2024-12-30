@@ -26,14 +26,7 @@ async function fetchTemplates() {
 }
 
 function TemplatesList() {
-  const [templates, setTemplates] = useState<
-    {
-      id: string;
-      title: string;
-      description: string;
-      files?: Record<string, any>;
-    }[]
-  >([]);
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -69,23 +62,24 @@ function TemplatesList() {
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-6">
-        {templates.map((template) => (
-          <Card key={template.id} className="flex flex-col md:flex-row">
-            <div className="flex-1 p-6">
-              <CardHeader>
-                <CardTitle>{template.title}</CardTitle>
-                <CardDescription>{template.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="mt-4">
-                  <Link to={`/templates/${template.id}`}>View Template</Link>
-                </Button>
-              </CardContent>
-            </div>
-            <div className="flex-1 bg-muted p-6 rounded-r-lg">
-              <pre className="text-sm overflow-x-auto">
-                <code>{Object.keys(template.files || {}).join("\n")}</code>
-              </pre>
+        {templates.map((template: any) => (
+          <Card key={template.id}>
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">
+                {template.name}
+              </CardTitle>
+              <CardDescription>{template.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="mt-4 text-sm">
+              <p className="mb-2">Created by: {template.name}</p>
+              <p>
+                Created on: {new Date(template.createdAt).toLocaleDateString()}
+              </p>
+            </CardContent>
+            <div className="flex justify-end m-4">
+              <Button asChild>
+                <Link to={`/templates/${template.id}`}>View</Link>
+              </Button>
             </div>
           </Card>
         ))}
