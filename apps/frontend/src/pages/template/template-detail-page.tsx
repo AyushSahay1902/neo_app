@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import CodeContainer from "../assignments/code-container";
+import { useNavigate } from "react-router-dom";
 
-const fetchTemplate = async (id) => {
+const fetchTemplate = async (id: Number) => {
   try {
     const response = await fetch(
       `http://localhost:3000/api/templates/getTemplate/${id}`
@@ -23,12 +23,13 @@ function TemplateDetailPage() {
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getTemplate = async () => {
       setLoading(true);
       setError(null);
-      const data = await fetchTemplate(id);
+      const data = await fetchTemplate(Number(id));
       if (data) {
         setTemplate(data);
       } else {
@@ -39,6 +40,11 @@ function TemplateDetailPage() {
 
     getTemplate();
   }, [id]);
+
+  const handleEdit = () => {
+    // Redirect to edit page
+    navigate(`/templates/editTemplate/${id}`);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -59,7 +65,15 @@ function TemplateDetailPage() {
       <p className="mb-6">
         Updated At: {new Date(template.updatedAt).toLocaleString()}
       </p>
-      <CodeContainer project={template} />
+
+      <div>
+        <button
+          onClick={handleEdit}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Edit
+        </button>
+      </div>
     </div>
   );
 }

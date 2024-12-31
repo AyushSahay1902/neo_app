@@ -25,6 +25,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "minio": "^8.0.3",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "react-router-dom": "^7.1.1"
   }
 }
