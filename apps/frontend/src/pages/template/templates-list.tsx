@@ -9,6 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import TemplateDetailPage from "./template-detail-page";
 
 async function fetchTemplates() {
   try {
@@ -27,6 +28,7 @@ async function fetchTemplates() {
 }
 
 function TemplatesList() {
+  const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,22 +49,8 @@ function TemplatesList() {
   }, []);
 
   const fetchTemplate = async (id: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/templates/getTemplate/${id}`
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to fetch template: ${response.statusText}`);
-      }
-      const templateData = await response.json();
-      console.log("Template data:", templateData);
-
-      // Navigate to the template view page with fetched data
-      navigate(`/templates/${id}`, { state: { template: templateData } });
-    } catch (error) {
-      console.error("Error fetching template:", error);
-      alert("Failed to fetch the template. Please try again.");
-    }
+    //redirect to the template detail page
+    navigate(`/templates/${id}`);
   };
 
   if (loading) {
