@@ -30,7 +30,7 @@ const getAssignmentById = async (id: number) => {
 router.post("/createAssignment", async (req: Request, res: Response) => {
   try {
     const { title, description, file } = req.body;
-
+    console.log("file", file);
     // Generate object name and save file content in MinIO
     const objectName = `assignment-${title}.json`;
     const fileContent = JSON.stringify(file, null, 2);
