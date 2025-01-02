@@ -9,6 +9,7 @@
     "db:migrate": "npx drizzle-kit migrate"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.5",
     "@types/bun": "latest",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
