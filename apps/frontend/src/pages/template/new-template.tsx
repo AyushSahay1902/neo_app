@@ -18,16 +18,13 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-
 import CodeContainer from "../assignments/code-container";
-import { templates, Template } from "@/data/templates"; // Import your templates data
+import { stack, Stack } from "@/data/templates";
 
 function NewTemplate() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null
-  );
+  const [selectedTemplate, setSelectedTemplate] = useState<Stack | null>(null);
   const navigate = useNavigate();
 
   const saveTemplate = async () => {
@@ -64,7 +61,7 @@ function NewTemplate() {
   };
 
   const handleSelectStack = (stackId: string) => {
-    const template = templates.find((template) => template.id === stackId);
+    const template = stack.find((item) => item.id === stackId);
     if (template) {
       setSelectedTemplate(template);
     }
@@ -113,9 +110,9 @@ function NewTemplate() {
                       <SelectValue placeholder="Select Tech Stack" />
                     </SelectTrigger>
                     <SelectContent>
-                      {templates.map((templates) => (
-                        <SelectItem key={templates.id} value={templates.id}>
-                          {templates.title}
+                      {stack.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.title}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -125,15 +122,21 @@ function NewTemplate() {
             </div>
             <div className="mb-6">
               <Label>Template Code</Label>
-              <CodeContainer
-                project={{
-                  title: name || "New Template",
-                  description: description || "New template description",
-                  stack: selectedTemplate?.id || "Select Tech Stack",
-                  files: selectedTemplate?.files || {},
-                  dependencies: selectedTemplate?.dependencies || {},
-                }}
-              />
+              {selectedTemplate ? (
+                <CodeContainer
+                  project={{
+                    title: name || "New Template",
+                    description: description || "New template description",
+                    template: selectedTemplate.id,
+                    files: selectedTemplate.files || {},
+                    dependencies: selectedTemplate.dependencies || {},
+                  }}
+                />
+              ) : (
+                <p className="text-gray-500">
+                  Please select a tech stack to load the code editor.
+                </p>
+              )}
             </div>
             <CardFooter className="flex justify-end">
               <Button type="submit">Save Template</Button>

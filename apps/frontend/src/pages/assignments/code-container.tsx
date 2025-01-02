@@ -7,7 +7,7 @@ interface CodeContainerProps {
   project: {
     title: string;
     description: string;
-    stack?: string; // User-selected stack
+    template?: string;
     height?: number;
     width?: string;
   };
@@ -18,27 +18,25 @@ function CodeContainer({ project }: CodeContainerProps) {
   const containerRef = useRef<any>(null);
 
   const _embedSDK = async () => {
-    // Find the selected template by stack ID
     const selectedTemplate = templates.find(
-      (template) => template.id === project.stack
+      (template) => template.id === project.template
     );
 
     if (!selectedTemplate) {
       toast({
         title: "Error",
-        description: "The selected stack template could not be found.",
+        description: "The selected template could not be found.",
         variant: "destructive",
       });
       return;
     }
 
-    // Embed the project with the selected template
     return sdk.embedProject(
       containerRef.current,
       {
         files: selectedTemplate.files,
         dependencies: selectedTemplate.dependencies,
-        template: "javascript", // Adjust the template type if needed
+        template: "javascript",
         title: selectedTemplate.title ?? "Default Project",
         description: selectedTemplate.description ?? "Project description",
       },

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -30,6 +31,7 @@ function AssignmentsList() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAssignments = async () => {
@@ -138,6 +140,19 @@ function AssignmentsList() {
                   <TableCell>
                     <Button asChild>
                       <Link to={`/assignments/${assignment.id}`}>View</Link>
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="hover:bg-green-500"
+                      onClick={() => {
+                        console.log("Attempt button clicked");
+                        navigate(`/assignments/${assignment.id}`);
+                      }}
+                    >
+                      <Link to={`/attempts/${assignment.id}`}>Attempt</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
