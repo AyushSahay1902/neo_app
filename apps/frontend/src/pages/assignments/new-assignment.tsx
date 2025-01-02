@@ -22,10 +22,10 @@ interface FormData {
 }
 
 interface Template {
-  id: string;
+  id: number;
   name: string;
-  files: Record<string, string>;
-  dependencies: Record<string, string>;
+  description: string;
+  bucketUrl: any;
 }
 
 export default function NewAssignmentForm() {
@@ -55,8 +55,8 @@ export default function NewAssignmentForm() {
       const payload = {
         title: data.title,
         description: data.description,
-        files: selectedTemplate.files,
-        dependencies: selectedTemplate.dependencies,
+        files: selectedTemplate.bucketUrl,
+        dependencies: selectedTemplate.description,
         templateId: selectedTemplate.id,
         difficulty: data.difficulty || "medium",
         status: data.status || "draft",
@@ -157,9 +157,10 @@ export default function NewAssignmentForm() {
             <CodeContainer
               project={{
                 title: selectedTemplate.name,
-                stack: "JavaScript",
-                files: selectedTemplate.files,
-                dependencies: selectedTemplate.dependencies,
+                description: selectedTemplate.description,
+                template: selectedTemplate.bucketUrl,
+                height: 800,
+                width: "100%",
               }}
             />
           </div>

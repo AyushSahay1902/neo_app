@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import sdk from "@stackblitz/sdk";
 import { useToast } from "@/hooks/use-toast";
-import { templates } from "@/data/templates";
+import { stack, Stack } from "@/data/templates";
 
 interface CodeContainerProps {
   project: {
@@ -18,7 +18,7 @@ function CodeContainer({ project }: CodeContainerProps) {
   const containerRef = useRef<any>(null);
 
   const _embedSDK = async () => {
-    const selectedTemplate = templates.find(
+    const selectedTemplate = stack.find(
       (template) => template.id === project.template
     );
 

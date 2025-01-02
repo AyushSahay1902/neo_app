@@ -42,7 +42,6 @@ export default function TemplateSelector({
 
   const handleTemplateChange = (value: string) => {
     setSelectedTemplate(value);
-    // Convert string value back to number for the parent component
     onSelect(parseInt(value, 10));
   };
 
