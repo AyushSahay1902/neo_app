@@ -37,13 +37,17 @@ router.post("/createAssignment", async (req: Request, res: Response) => {
     await minioClient.putObject(bucketName, objectName, fileContent);
 
     // Generate MinIO URL and save the assignment in the database
-    const bucketUrl = `${bucketName}/${objectName}`;
+    const presignedUrl = await minioClient.presignedGetObject(
+      bucketName,
+      objectName,
+      24 * 60 * 60
+    );
     const [newAssignment] = await db
       .insert(assignments)
       .values({
         title,
         description,
-        bucketUrl,
+        bucketUrl: presignedUrl,
         updatedAt: new Date(),
       })
       .returning({
@@ -57,7 +61,7 @@ router.post("/createAssignment", async (req: Request, res: Response) => {
       data: {
         id: newAssignment.id,
         title: newAssignment.title,
-        url: bucketUrl,
+        url: presignedUrl,
       },
     });
   } catch (error: any) {
