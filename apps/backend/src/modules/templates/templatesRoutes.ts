@@ -7,6 +7,30 @@ import { eq } from "drizzle-orm";
 
 const router = express.Router();
 
+router.get("/getTemplates", async (_req: Request, res: Response) => {
+  try {
+    const allTemplates = await db
+      .select({
+        id: templates.id,
+        name: templates.name,
+        description: templates.description,
+        bucketUrl: templates.bucketUrl,
+        status: templates.status,
+        createdAt: templates.createdAt,
+        updatedAt: templates.updatedAt,
+      })
+      .from(templates)
+      .execute(); // This returns an array of rows
+
+    res.status(200).send(allTemplates); // Send the full array as the response
+  } catch (error: any) {
+    console.error(`Error getting templates: ${error}`);
+    res
+      .status(500)
+      .send({ message: "Error getting templates", error: error.message });
+  }
+});
+
 router.post("/createTemplate", async (req: Request, res: Response) => {
   try {
     const { name, description, files } = req.body;
@@ -17,6 +41,7 @@ router.post("/createTemplate", async (req: Request, res: Response) => {
       .values({
         name,
         description,
+        status: "active",
         bucketUrl: "",
         updatedAt: new Date(),
       })
@@ -49,30 +74,7 @@ router.post("/createTemplate", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/getTemplates", async (_req: Request, res: Response) => {
-  try {
-    const allTemplates = await db
-      .select({
-        id: templates.id,
-        name: templates.name,
-        description: templates.description,
-        bucketUrl: templates.bucketUrl,
-        createdAt: templates.createdAt,
-        updatedAt: templates.updatedAt,
-      })
-      .from(templates)
-      .execute(); // This returns an array of rows
-
-    res.status(200).send(allTemplates); // Send the full array as the response
-  } catch (error: any) {
-    console.error(`Error getting templates: ${error}`);
-    res
-      .status(500)
-      .send({ message: "Error getting templates", error: error.message });
-  }
-});
-
-router.post("/editTemplate/:id", async (req: Request, res: Response) => {
+router.put("/editTemplate/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { files } = req.body;
@@ -84,6 +86,7 @@ router.post("/editTemplate/:id", async (req: Request, res: Response) => {
         id: templates.id,
         name: templates.name,
         description: templates.description,
+        status: templates.status,
         bucketUrl: templates.bucketUrl,
         createdAt: templates.createdAt,
         updatedAt: templates.updatedAt,
@@ -98,9 +101,7 @@ router.post("/editTemplate/:id", async (req: Request, res: Response) => {
     }
 
     const objectName = `${template.name || template.id}.json`;
-
     const filesContent = JSON.stringify(files, null, 2);
-
     await minioClient.putObject(bucketName, objectName, filesContent);
 
     res.status(200).send({ message: "Template files updated successfully" });

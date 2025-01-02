@@ -17,6 +17,7 @@ export const templates = pgTable("templates", {
   name: varchar("name").notNull(),
   description: varchar("description"),
   bucketUrl: varchar("bucket_url"), // URL for the JSON file in the bucket
+  status: varchar("status").notNull(), // e.g., 'active', 'archived'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -28,6 +29,7 @@ export const assignments = pgTable("assignments", {
   description: varchar("description").notNull(),
   templateId: integer("template_id").references(() => templates.id),
   bucketUrl: varchar("bucket_url"), // URL for the JSON file in the bucket
+  difficulty: varchar("difficulty"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
