@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { IoArrowBack } from "react-icons/io5";
 import {
   Label,
   Input,
@@ -88,6 +89,10 @@ export default function NewAssignmentForm() {
     }
   };
 
+  const handleBackClick = () => {
+    navigate("/assignments");
+  };
+
   const handleTemplateSelect = async (templateId: number) => {
     try {
       const response = await fetch(
@@ -108,6 +113,12 @@ export default function NewAssignmentForm() {
 
   return (
     <div className="max-w-5xl">
+      <div>
+        <Button onClick={handleBackClick} variant="ghost" className="mr-4">
+          <IoArrowBack size={20} />
+          <span className="ml-2">Back to Assignments</span>
+        </Button>
+      </div>
       <div className="mb-10">
         <h1 className="text-2xl font-semibold">Create New Assignment</h1>
         <p>Add a new coding challenge to improve your skills</p>
@@ -167,13 +178,6 @@ export default function NewAssignmentForm() {
         )}
 
         <div className="flex justify-between mt-8">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/assignments")}
-          >
-            Cancel
-          </Button>
           <Button type="submit" disabled={isSubmitting || !selectedTemplate}>
             {isSubmitting ? "Creating..." : "Create Assignment"}
           </Button>
