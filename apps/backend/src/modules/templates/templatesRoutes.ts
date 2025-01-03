@@ -138,8 +138,28 @@ router.get("/getTemplate/:id", async (req: Request, res: Response) => {
     }
 
     const objectName = `${template.name || template.id}.json`;
-    //return the template object from the db
-    res.status(200).send(template);
+    // Fetch the file from the bucket
+    const fileStream = await minioClient.getObject(bucketName, objectName);
+
+    // Convert the stream into a string
+    let filesContent = "";
+    for await (const chunk of fileStream) {
+      filesContent += chunk.toString();
+    }
+
+    // Parse the string as JSON
+    const files = JSON.parse(filesContent);
+
+    // Return the template object from the database
+    return res.status(200).json({
+      message: "Required template fetched successfully",
+      template: [
+        {
+          ...template,
+          files,
+        },
+      ],
+    });
   } catch (error: any) {
     console.error(`Error getting template: ${error}`);
     res
