@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { IoArrowBack } from "react-icons/io5";
 import {
   Select,
   SelectContent,
@@ -72,8 +73,22 @@ function NewTemplate() {
     saveTemplate();
   };
 
+  const handleBackClick = () => {
+    navigate("/templates");
+  };
+
   return (
     <div className="p-6">
+      <div>
+        <Button
+          onClick={handleBackClick}
+          variant="ghost"
+          className="flex items-center gap-2"
+        >
+          <IoArrowBack className="text-xl" />
+          <span>Back to Templates</span>
+        </Button>
+      </div>
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Add New Template</CardTitle>

@@ -143,10 +143,12 @@ function AssignmentsList() {
                       className="hover:bg-green-500"
                       onClick={() => {
                         console.log("Attempt button clicked");
-                        navigate(`/assignments/${assignment.id}`);
+                        navigate(`/assignments`);
                       }}
                     >
-                      <Link to={`/attempts/${assignment.id}`}>Attempt</Link>
+                      <Link to={`/assignments/${assignment.id}/attempt`}>
+                        Attempt
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>

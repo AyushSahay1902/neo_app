@@ -1,6 +1,6 @@
 export interface Stack {
-  id: string;
-  template?: string;
+  id: number;
+  name: string;
   title: string;
   description: string;
   files: { [key: string]: string };
@@ -9,7 +9,60 @@ export interface Stack {
 
 export const stack: Stack[] = [
   {
-    id: "frontend_react_vitest",
+    id: 1,
+    name: "React",
+    title: "Simple React App",
+    description: "A basic React app for demonstration purposes",
+    files: {
+      "src/App.tsx": `
+import React from 'react';
+
+function App() {
+  return (
+    <div>
+      <h1>Hello, React!</h1>
+      <p>This is a simple React app.</p>
+    </div>
+  );
+}
+
+export default App;
+      `,
+      "src/index.tsx": `
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+      `,
+      "public/index.html": `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple React App</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+      `,
+    },
+    dependencies: {
+      react: "^17.0.2",
+      "react-dom": "^17.0.2",
+      typescript: "^4.5.4",
+    },
+  },
+  {
+    id: 2,
+    name: "React + Vitest",
     title: "Frontend React with Vitest",
     description: "A React template with Vitest for unit testing",
     files: {
@@ -55,7 +108,8 @@ test('renders counter and increments', () => {
     },
   },
   {
-    id: "frontend_static_vitest",
+    id: 3,
+    name: "Static + Vitest",
     title: "Frontend Static with Vitest",
     description: "A static HTML/JS template with Vitest for unit testing",
     files: {
@@ -122,8 +176,8 @@ test('increments counter on button click', () => {
     },
   },
   {
-    id: "backend_node_junit",
-    template: "node",
+    id: 4,
+    name: "Node + JUnit",
     title: "Backend Node with JUnit",
     description: "A Node.js backend template with JUnit for unit testing",
     files: {
@@ -160,8 +214,8 @@ describe('GET /', () => {
     },
   },
   {
-    id: "fullstack_mongo_express",
-    template: "node",
+    id: 5,
+    name: "Fullstack + MongoDB",
     title: "Fullstack MongoDB and Express",
     description: "A full-stack template with MongoDB and Express.js",
     files: {
@@ -187,8 +241,8 @@ app.listen(3000, () => {
     },
   },
   {
-    id: "backend_fastapi",
-    template: "python",
+    id: 6,
+    name: "FastAPI",
     title: "Backend FastAPI",
     description: "A Python backend template using FastAPI",
     files: {
