@@ -27,6 +27,7 @@ interface Template {
   name: string;
   description: string;
   bucketUrl: any;
+  files: Record<string, string>;
 }
 
 export default function NewAssignmentForm() {
@@ -56,7 +57,7 @@ export default function NewAssignmentForm() {
       const payload = {
         title: data.title,
         description: data.description,
-        files: selectedTemplate.bucketUrl,
+        files: selectedTemplate.files,
         dependencies: selectedTemplate.description,
         templateId: selectedTemplate.id,
         difficulty: data.difficulty || "medium",
@@ -169,7 +170,7 @@ export default function NewAssignmentForm() {
               project={{
                 title: selectedTemplate.name,
                 description: selectedTemplate.description,
-                template: selectedTemplate.bucketUrl,
+                files: selectedTemplate.files,
                 height: 800,
                 width: "100%",
               }}

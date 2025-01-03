@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
-import CodeContainer from "../assignments/code-container";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import sdk from "@stackblitz/sdk";
 
 interface Template {
   id: number;
   name: string;
   description: string;
   bucketUrl: string;
-  files: Record<string, string>;
-  dependencies: Record<string, string>;
+  files?: Record<string, string>;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,48 +29,55 @@ function TemplateDetailPage() {
         setLoading(true);
         setError(null);
 
+        if (!id) {
+          throw new Error("Template ID is required");
+        }
+
         const response = await fetch(
           `http://localhost:3000/api/templates/getTemplate/${id}`
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch template");
-        }
-
         const data = await response.json();
 
-        if (!data.template?.[0]) {
-          throw new Error("Template not found");
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch template");
         }
 
         const templateData = data.template[0];
-
-        // If there's a bucketUrl, fetch the files
-        if (templateData.bucketUrl) {
-          const filesResponse = await fetch(templateData.bucketUrl);
-          if (!filesResponse.ok) {
-            throw new Error("Failed to fetch template files");
-          }
-          const filesData = await filesResponse.json();
-          templateData.files = filesData;
-        }
+        console.log("Received template data:", templateData); // Debug log
 
         setTemplate(templateData);
       } catch (err) {
+        console.error("Error fetching template:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchTemplate();
-    }
+    fetchTemplate();
   }, [id]);
 
-  const handleEdit = () => {
-    navigate(`/templates/editTemplate/${id}`);
-  };
+  useEffect(() => {
+    if (template?.files) {
+      sdk.embedProject(
+        "stackblitz-container", // ID of the div to embed the IDE
+        {
+          files: template.files,
+          title: template.name,
+          description: template.description || "",
+          template: "javascript",
+          dependencies: {
+            react: "^17.0.0",
+            "react-dom": "^17.0.0",
+          },
+        },
+        {
+          height: 600,
+          width: "100%",
+        }
+      );
+    }
+  }, [template]);
 
   const handleBackClick = () => {
     navigate("/templates");
@@ -80,9 +86,9 @@ function TemplateDetailPage() {
   if (loading) {
     return (
       <div className="p-6 space-y-4">
-        <Skeleton className="h-8 w-[200px]" />
-        <Skeleton className="h-4 w-[300px]" />
-        <Skeleton className="h-[400px] w-full" />
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
@@ -109,10 +115,10 @@ function TemplateDetailPage() {
         <Button
           onClick={handleBackClick}
           variant="ghost"
-          className="flex items-center"
+          className="flex items-center gap-2"
         >
-          <IoArrowBack size={20} />
-          <span className="ml-2">Back to Templates</span>
+          <IoArrowBack className="text-xl" />
+          <span>Back to Templates</span>
         </Button>
       </div>
 
@@ -123,34 +129,53 @@ function TemplateDetailPage() {
         )}
       </div>
 
+      <div>
+        <div className="flex gap-2 mt-2">
+          <span className="px-3 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full">
+            React
+          </span>
+          <span className="px-3 py-1 bg-green-100 text-green-600 text-sm font-medium rounded-full">
+            tailwindcss
+          </span>
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-600 text-sm font-medium rounded-full">
+            Vitest
+          </span>
+          <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded-full">
+            Jasmine
+          </span>
+        </div>
+      </div>
+
       <div className="space-y-2 text-sm text-gray-600">
         <p>Created: {new Date(template.createdAt).toLocaleString()}</p>
         <p>Last Updated: {new Date(template.updatedAt).toLocaleString()}</p>
       </div>
 
-      {/* CodeContainer for template files */}
       {template.files && (
-        <div className="mt-6">
-          <CodeContainer
-            project={{
-              title: template.name,
-              description: template.description || "",
-              stack: String(template.id),
-              files: template.files,
-              dependencies: template.dependencies || {},
-            }}
-          />
-        </div>
+        <div id="stackblitz-container" className="mt-6 border rounded-md"></div>
       )}
 
-      <div className="mt-6">
-        <Button
-          onClick={handleEdit}
-          className="bg-blue-500 hover:bg-blue-700 text-white"
-        >
-          Edit Template
-        </Button>
+      {/* Debug info */}
+      <div className="mt-6 p-4 bg-gray-100 rounded">
+        <h2 className="text-lg font-semibold mb-2">Debug Info:</h2>
+        <pre className="whitespace-pre-wrap text-sm">
+          {JSON.stringify(
+            {
+              templateId: template.id,
+              files: template.files,
+              bucketUrl: template.bucketUrl,
+            },
+            null,
+            2
+          )}
+        </pre>
       </div>
+      <Button
+        onClick={() => console.log("Save template clicked")}
+        className="mt-4"
+      >
+        Save Template
+      </Button>
     </div>
   );
 }

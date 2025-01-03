@@ -20,10 +20,17 @@ interface Assignment {
   bucketUrl: string;
   createdAt: string;
   updatedAt: string;
+  files: { [key: string]: string };
+  templateId: number;
+  dependencies: { [key: string]: string };
+  openFile?: string;
+  height?: number;
+  width?: string;
+  initScripts?: string;
 }
 
 function AssignmentDetailPage() {
-  const { id } = useParams<{ id: number }>();
+  const { id } = useParams<{ id: string }>();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

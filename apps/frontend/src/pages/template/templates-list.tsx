@@ -130,7 +130,7 @@ function TemplatesList() {
                   onClick={() => fetchTemplate(template.id)}
                   className="mt-auto bg-slate-900 text-white"
                 >
-                  View Template
+                  View/Edit Template
                 </Button>
               </div>
             </div>

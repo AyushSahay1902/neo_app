@@ -24,41 +24,70 @@ const CodeContainer = ({
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // Updated stack
   const stack = [
     {
-      id: "react",
+      id: "react", // Added an 'id' to identify the template
+      name: "React Template",
+      type: "node",
       files: {
-        "index.html": "<div id='root'></div>",
-        "index.js":
-          "import ReactDOM from 'react-dom'; ReactDOM.render('Hello React!', document.getElementById('root'));",
+        "src/App.tsx": `import React from 'react';
+
+export default function App() {
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Hello React!</h1>
+    </div>
+  );
+}`,
+        "src/index.tsx": `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+
+const root = createRoot(document.getElementById('root')!);
+root.render(<App />);`,
+        "public/index.html": `<!DOCTYPE html>
+<html>
+  <head>
+    <title>React App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>`,
+        "package.json": `
+{
+  "name": "react-template",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "18.1.0",
+    "react-dom": "18.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "react-scripts": "latest"
+  }
+}`,
       },
       dependencies: {
-        react: "^17.0.0",
-        "react-dom": "^17.0.0",
+        react: "18.1.0",
+        "react-dom": "18.1.0",
       },
       title: "React Project",
       description: "A basic React project template",
     },
-    // Add more templates here
   ];
 
   const _embedSDK = async () => {
     const selectedTemplate = project.templateId
       ? stack.find((template) => template.id === project.templateId.toString())
-      : {
-          id: "default-react",
-          files: {
-            "index.html": "<div id='root'></div>",
-            "index.js":
-              "import ReactDOM from 'react-dom'; ReactDOM.render('Welcome to React!', document.getElementById('root'));",
-          },
-          dependencies: {
-            react: "^17.0.0",
-            "react-dom": "^17.0.0",
-          },
-          title: "Default React App",
-          description: "A basic React app",
-        };
+      : stack[0]; // Use the first template as the default
 
     if (!selectedTemplate) {
       toast({
@@ -75,12 +104,12 @@ const CodeContainer = ({
         {
           files: selectedTemplate.files,
           dependencies: selectedTemplate.dependencies,
-          template: "javascript",
+          template: selectedTemplate.id || "react", // Use the first template as the default
           title: selectedTemplate.title ?? "Untitled Project",
           description: selectedTemplate.description ?? "Project description",
         },
         {
-          openFile: project.openFile ?? "index.js",
+          openFile: project.openFile ?? "src/App.tsx",
           height: project.height ?? 600,
           width: project.width ?? "100%",
           startScript: project.initScripts, // Include init scripts if provided
