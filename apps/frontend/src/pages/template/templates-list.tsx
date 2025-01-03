@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router";
-import { useNavigate } from "react-router";
+import { Link } from "react-router-dom"; // Updated to react-router-dom
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardHeader,
@@ -9,7 +9,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import TemplateDetailPage from "./template-detail-page";
+import { Badge } from "@/components/ui/badge"; // ShadCN Badge Component
+import { cn } from "@/lib/utils"; // Utility for conditional classes (optional)
 
 async function fetchTemplates() {
   try {
@@ -49,8 +50,20 @@ function TemplatesList() {
   }, []);
 
   const fetchTemplate = async (id: string) => {
-    //redirect to the template detail page
     navigate(`/templates/${id}`);
+  };
+
+  const addVersions = (templates: any[]) => {
+    const versionMap: { [key: string]: number } = {};
+    return templates.map((template) => {
+      const name = template.name;
+      if (versionMap[name]) {
+        versionMap[name] += 1; // Increment version if the name exists
+      } else {
+        versionMap[name] = 1; // Start with version 1
+      }
+      return { ...template, version: versionMap[name] };
+    });
   };
 
   if (loading) {
@@ -71,21 +84,55 @@ function TemplatesList() {
       </div>
       <div className="grid grid-cols-1 gap-6">
         {templates.map((template: any) => (
-          <Card key={template.id}>
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">
-                {template.name}
-              </CardTitle>
-              <CardDescription>{template.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="mt-4 text-sm">
-              <p className="mb-2">Created by: {template.name}</p>
-              <p>
-                Created on: {new Date(template.createdAt).toLocaleDateString()}
-              </p>
-            </CardContent>
-            <div className="flex justify-end m-4">
-              <Button onClick={() => fetchTemplate(template.id)}>View</Button>
+          <Card key={template.id} className="shadow-md border border-gray-200">
+            {/* Flex container for left and right sections */}
+            <div className="flex">
+              {/* Left Section */}
+              <div className="p-4 flex-1">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-xl font-semibold">
+                      {template.name}
+                    </CardTitle>
+                    <Badge variant="secondary">v{template.version || 1}</Badge>
+                  </div>
+                  <CardDescription className="text-gray-500">
+                    {template.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="mt-4 text-sm">
+                  <div className="flex gap-2 flex-wrap">
+                    {template.tags?.map((tag: string) => (
+                      <Badge
+                        key={tag}
+                        className={cn("bg-blue-100 text-blue-800")}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-gray-700">
+                    Created on:{" "}
+                    {new Date(template.createdAt).toLocaleDateString()}
+                  </p>
+                </CardContent>
+              </div>
+
+              {/* Right Section */}
+              <div className="bg-gray-50 p-4 border-l border-gray-200 w-full md:w-1/3 flex flex-col justify-between">
+                <h1>Files</h1>
+                <div className="flex-1">
+                  {/* Any other content goes here */}
+                </div>
+                {/* Button at the bottom */}
+                <Button
+                  variant="link"
+                  onClick={() => fetchTemplate(template.id)}
+                  className="mt-auto bg-slate-900 text-white"
+                >
+                  View Template
+                </Button>
+              </div>
             </div>
           </Card>
         ))}
