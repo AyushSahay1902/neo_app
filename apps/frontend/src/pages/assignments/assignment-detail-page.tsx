@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import CodeContainer from "./code-container";
-import { assignmentProjects } from "@/data/assignmentProjects";
+import { IoArrowBack } from "react-icons/io5";
+import { Button } from "@/components/ui/button"; // Import Button component
 
 interface Assignment {
   id: number;
@@ -22,12 +23,10 @@ interface Assignment {
 }
 
 function AssignmentDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: number }>();
   const [assignment, setAssignment] = useState<Assignment | null>(null);
-  const [project, setProject] = useState<(typeof assignmentProjects)[0] | null>(
-    null
-  );
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,7 +35,6 @@ function AssignmentDetailPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch assignment details from the API
         const response = await fetch(
           `http://localhost:3000/api/assignments/getAssignment/${id}`
         );
@@ -45,14 +43,8 @@ function AssignmentDetailPage() {
         }
 
         const result = await response.json();
-        const data: Assignment = result.data; // Extract the assignment data
+        const data: Assignment = result.data;
         setAssignment(data);
-
-        // Fetch the project information
-        const projectInfo = assignmentProjects.find((p) => p.id === id);
-        if (projectInfo) {
-          setProject(projectInfo);
-        }
       } catch (error: any) {
         setError(error.message);
         console.error("Error fetching assignment:", error);
@@ -63,6 +55,11 @@ function AssignmentDetailPage() {
 
     fetchAssignment();
   }, [id]);
+
+  const handleEditClick = () => {
+    // Empty onClick function for now
+    console.log("Edit this assignment clicked");
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -75,9 +72,18 @@ function AssignmentDetailPage() {
   if (!assignment) {
     return <div>No assignment found.</div>;
   }
+  const handleBackClick = () => {
+    navigate("/assignments");
+  };
 
   return (
     <Card>
+      <div className="flex items-center mb-4">
+        <Button onClick={handleBackClick} variant="ghost" className="mr-4">
+          <IoArrowBack size={20} />
+          <span className="ml-2">Back to Assignments</span>
+        </Button>
+      </div>
       <CardHeader>
         <CardTitle>{assignment.title}</CardTitle>
         <CardDescription>{assignment.description}</CardDescription>
@@ -102,13 +108,15 @@ function AssignmentDetailPage() {
           <strong>Updated At:</strong>{" "}
           {new Date(assignment.updatedAt).toLocaleString()}
         </div>
+
+        {/* Tabs for code and tests */}
         <Tabs defaultValue="code" className="w-full">
           <TabsList>
             <TabsTrigger value="code">Code</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
           </TabsList>
           <TabsContent value="code">
-            {project && <CodeContainer project={project} />}
+            {assignment && <CodeContainer project={assignment} />}
           </TabsContent>
           <TabsContent value="tests">
             <Textarea
@@ -118,6 +126,13 @@ function AssignmentDetailPage() {
             />
           </TabsContent>
         </Tabs>
+
+        {/* Edit Button */}
+        <div className="mt-6 flex justify-end">
+          <Button onClick={handleEditClick} variant="secondary">
+            Edit this Assignment
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

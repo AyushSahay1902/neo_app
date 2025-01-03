@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -17,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface Assignment {
@@ -127,14 +121,12 @@ function AssignmentsList() {
                     <Badge
                       className={getDifficultyColor(assignment.difficulty)}
                     >
-                      {assignment.difficulty == "Beginner"}
+                      {assignment.difficulty}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(assignment.status)}>
-                      {assignment.status == "Not Started"
-                        ? "Not Started"
-                        : "In Progress"}
+                      {assignment.status}
                     </Badge>
                   </TableCell>
                   <TableCell>

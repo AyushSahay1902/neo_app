@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { IoArrowBack } from "react-icons/io5";
 
 const fetchTemplate = async (id: Number) => {
   try {
@@ -46,6 +47,10 @@ function TemplateDetailPage() {
     navigate(`/templates/editTemplate/${id}`);
   };
 
+  const handleBackClick = () => {
+    navigate("/templates");
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -56,6 +61,12 @@ function TemplateDetailPage() {
 
   return (
     <div className="p-6">
+      <div className="flex items-center mb-4">
+        <Button onClick={handleBackClick} variant="ghost" className="mr-4">
+          <IoArrowBack size={20} />
+          <span className="ml-2">Back to Templates</span>
+        </Button>
+      </div>
       <h1 className="text-3xl font-bold mb-6">{template.name}</h1>
       <p className="mb-6">Description: {template.description}</p>
       <p className="mb-6">Bucket URL: {template.bucketUrl || "N/A"}</p>

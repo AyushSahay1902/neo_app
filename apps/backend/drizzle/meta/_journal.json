@@ -15,6 +15,13 @@
       "when": 1735283110046,
       "tag": "0001_deep_korvac",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1735836558166,
+      "tag": "0002_fancy_spectrum",
+      "breakpoints": true
     }
   ]
 }
