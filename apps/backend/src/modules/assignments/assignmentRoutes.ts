@@ -56,8 +56,9 @@ router.get(
   "/getAssignment/:id",
   async (req: Request<{ id: string }>, res: Response): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
+      const id = parseInt(req.params.id, 10); // Parse the ID as an integer
+      if (isNaN(id) || id.toString() !== req.params.id) {
+        // Check if the parsed number matches the original string
         res.status(400).send({ message: "Invalid assignment ID" });
         return;
       }

@@ -10,54 +10,90 @@ export interface Stack {
 export const stack: Stack[] = [
   {
     id: 1,
-    name: "React",
-    title: "Simple React App",
-    description: "A basic React app for demonstration purposes",
+    name: "React + Node + Vitest",
+    title: "React + Node + Vitest Project",
+    description: "A sample project using React, Node.js, and Vitest.",
     files: {
-      "src/App.tsx": `
-import React from 'react';
+      "package.json": JSON.stringify(
+        {
+          name: "react-node-vitest",
+          version: "1.0.0",
+          main: "index.js",
+          scripts: {
+            start: "node index.js",
+            test: "vitest",
+            dev: "vite",
+          },
+          dependencies: {
+            react: "^18.0.0",
+            "react-dom": "^18.0.0",
+          },
+          devDependencies: {
+            vite: "^4.0.0",
+            vitest: "^0.35.0",
+          },
+        },
+        null,
+        2
+      ),
+      "index.js": `
+        const express = require('express');
+        const app = express();
 
-function App() {
-  return (
-    <div>
-      <h1>Hello, React!</h1>
-      <p>This is a simple React app.</p>
-    </div>
-  );
-}
+        app.get('/', (req, res) => {
+          res.send('Hello from Node.js!');
+        });
 
-export default App;
+        app.listen(3000, () => {
+          console.log('Server is running on http://localhost:3000');
+        });
       `,
-      "src/index.tsx": `
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
+      "vite.config.js": `
+        import { defineConfig } from 'vite';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+        export default defineConfig({
+          test: {
+            globals: true,
+            environment: 'node',
+          },
+        });
       `,
-      "public/index.html": `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple React App</title>
-</head>
-<body>
-  <div id="root"></div>
-</body>
-</html>
+      "src/main.jsx": `
+        import React from 'react';
+        import ReactDOM from 'react-dom';
+
+        const App = () => <h1>Hello from React!</h1>;
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+      `,
+      "src/index.html": `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>React App</title>
+        </head>
+        <body>
+          <div id="root"></div>
+        </body>
+        </html>
       `,
     },
     dependencies: {
-      react: "^17.0.2",
-      "react-dom": "^17.0.2",
-      typescript: "^4.5.4",
+      express: "^4.18.0",
+    },
+  },
+  {
+    id: 2,
+    name: "React + Vitest",
+    title: "Frontend React with Vitest",
+    description: "A React template with Vitest for unit testing",
+    files: {
+      // Existing files for stack[1]
+    },
+    dependencies: {
+      // Existing dependencies for stack[1]
     },
   },
   {

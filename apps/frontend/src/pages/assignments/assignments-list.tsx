@@ -137,19 +137,14 @@ function AssignmentsList() {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      className="hover:bg-green-500"
-                      onClick={() => {
-                        console.log("Attempt button clicked");
-                        navigate(`/assignments`);
-                      }}
-                    >
-                      <Link to={`/assignments/${assignment.id}/attempt`}>
+                    <Link to={`/assignments/${assignment.id}/attempt`}>
+                      <Button
+                        variant="secondary"
+                        className="hover:bg-green-500"
+                      >
                         Attempt
-                      </Link>
-                    </Button>
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
