@@ -30,6 +30,7 @@ export const assignments = pgTable("assignments", {
   templateId: integer("template_id").references(() => templates.id),
   bucketUrl: varchar("bucket_url"), // URL for the JSON file in the bucket
   difficulty: varchar("difficulty"),
+  status: varchar("status").notNull(), // e.g., 'active', 'archived'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

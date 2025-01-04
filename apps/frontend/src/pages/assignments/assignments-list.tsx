@@ -18,7 +18,7 @@ interface Assignment {
   title: string;
   description: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
-  status: "Not Started" | "In Progress" | "Completed";
+  status: "active" | "archived" | "submitted";
 }
 
 function AssignmentsList() {
@@ -62,17 +62,26 @@ function AssignmentsList() {
     }
   };
 
-  const getStatusColor = (status: Assignment["status"]) => {
+  const getStatusColor = (status: "active" | "archived" | "submitted") => {
     switch (status) {
-      case "Not Started":
-        return "bg-gray-500";
-      case "In Progress":
-        return "bg-blue-500";
-      case "Completed":
-        return "bg-green-500";
+      case "active":
+        return "bg-blue-500"; // Blue for active
+      case "archived":
+        return "bg-gray-500"; // Gray for archived
+      case "submitted":
+        return "bg-green-500"; // Green for submitted
       default:
-        return "bg-gray-500";
+        return "bg-gray-500"; // Default case if status is unknown
     }
+  };
+
+  const getAttemptButtonStyles = (
+    status: "active" | "archived" | "submitted"
+  ) => {
+    if (status === "archived") {
+      return "bg-red-500 cursor-not-allowed"; // Red and disabled when archived
+    }
+    return "hover:bg-green-500"; // Normal button style for other statuses
   };
 
   if (loading) {
@@ -131,7 +140,10 @@ function AssignmentsList() {
                   </TableCell>
                   <TableCell>
                     <Button asChild>
-                      <Link to={`/assignments/${assignment.id}`}>
+                      <Link
+                        to={`/assignments/${assignment.id}`}
+                        className="text-blue-500"
+                      >
                         View/Edit
                       </Link>
                     </Button>
@@ -140,7 +152,10 @@ function AssignmentsList() {
                     <Link to={`/assignments/${assignment.id}/attempt`}>
                       <Button
                         variant="secondary"
-                        className="hover:bg-green-500"
+                        className={`${getAttemptButtonStyles(
+                          assignment.status
+                        )}`}
+                        disabled={assignment.status === "archived"} // Disable button if archived
                       >
                         Attempt
                       </Button>

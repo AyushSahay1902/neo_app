@@ -36,6 +36,7 @@ router.get("/listAssignment", async (req: Request, res: Response) => {
         description: assignments.description,
         bucketUrl: assignments.bucketUrl,
         difficulty: assignments.difficulty || "beginner",
+        status: assignments.status || "active",
         createdAt: assignments.createdAt,
         updatedAt: assignments.updatedAt,
       })
