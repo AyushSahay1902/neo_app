@@ -1,105 +1,138 @@
 import React, { useEffect, useState } from "react";
-import CodeContainer from "./code-container";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button"; // Import Button component
+import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const AttemptAssignment = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { assignmentId } = useParams<{ assignmentId: string }>();
-
-  const [project, setProject] = useState<{
-    files: { [key: string]: string };
+interface AssignmentResponse {
+  message: string;
+  data: {
+    id: number;
     title: string;
     description: string;
-    templateId: number;
-    dependencies: { [key: string]: string };
-    openFile?: string;
-    height?: number;
-    width?: string;
-    initScripts?: string;
-  } | null>(null);
+    bucketUrl: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
 
+function AttemptAssignment() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const [assignment, setAssignment] = useState<
+    AssignmentResponse["data"] | null
+  >(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = assignmentId;
-    if (!assignmentId) {
-      toast({
-        title: "Error",
-        description: "Assignment ID is missing",
-        duration: 5000,
-      });
-      return;
-    }
-    console.log("Assignment ID:", assignmentId); // Debugging
-    fetch(`http://localhost:3000/api/assignments/getAssignment/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Fetched data:", data); // Debugging
-        if (data.success) {
-          setProject(data.data);
-        } else {
-          toast({
-            title: "Error",
-            description: data.message || "Failed to load assignment",
-            duration: 5000,
-          });
-        }
+    const fetchAssignmentMetadata = async () => {
+      if (!id) {
+        setError("Assignment ID is missing");
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Fetch error:", error);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch only assignment metadata
+        const response = await fetch(
+          `http://localhost:3000/api/assignments/getAssignment/${id}`,
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Include if you're using cookies
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch assignment: ${response.statusText}`);
+        }
+
+        const assignmentData: AssignmentResponse = await response.json();
+        setAssignment(assignmentData.data);
+      } catch (err) {
+        console.error("Error in fetch:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "An error occurred";
+        setError(errorMessage);
         toast({
           title: "Error",
-          description: error.message,
-          duration: 5000,
+          description: errorMessage,
+          variant: "destructive",
         });
+      } finally {
         setLoading(false);
-      });
-  }, [assignmentId, toast]);
+      }
+    };
+
+    fetchAssignmentMetadata();
+  }, [id, toast]);
 
   const handleBackClick = () => {
     navigate("/assignments");
   };
 
   if (loading) {
-    return <div>Loading Assignment...</div>;
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    );
   }
 
-  if (!project) {
-    return <div>No project data available.</div>;
+  if (error) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!assignment) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertDescription>Assignment not found</AlertDescription>
+      </Alert>
+    );
   }
 
   return (
-    <div>
-      {/* Back Button */}
-      <div className="flex items-center mb-4">
-        <Button onClick={handleBackClick} variant="ghost" className="mr-4">
-          <IoArrowBack size={20} />
-          <span className="ml-2">Back to Assignments</span>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <Button
+          onClick={handleBackClick}
+          variant="ghost"
+          className="flex items-center gap-2"
+        >
+          <IoArrowBack className="text-xl" />
+          <span>Back to Assignments</span>
         </Button>
       </div>
 
-      {/* Assignment Information */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-semibold">{project.title}</h1>
-        <p className="mt-2">{project.description}</p>
-      </div>
-
-      {/* Code Container */}
-      <div className="mt-6">
-        <CodeContainer project={project} />
-      </div>
-
-      {/* Submit Button */}
-      <div className="mt-6 flex justify-end">
-        <Button variant="secondary">Submit Attempt</Button>
+      <div>
+        <h1 className="text-3xl font-bold">{assignment.title}</h1>
+        {assignment.description && (
+          <p className="mt-2 text-gray-600">{assignment.description}</p>
+        )}
+        <p className="mt-4 text-sm text-gray-500">
+          Created At: {new Date(assignment.createdAt).toLocaleString()}
+        </p>
+        <p className="text-sm text-gray-500">
+          Last Updated: {new Date(assignment.updatedAt).toLocaleString()}
+        </p>
       </div>
     </div>
   );
-};
+}
 
 export default AttemptAssignment;

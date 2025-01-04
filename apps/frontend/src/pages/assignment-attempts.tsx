@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -28,6 +29,7 @@ function AssignmentAttempts() {
   const { id } = useParams<{ id: string }>();
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [assignment, setAssignment] = useState<{ title: string } | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulating API calls to fetch assignment details and attempts
@@ -48,8 +50,8 @@ function AssignmentAttempts() {
   }, [id]);
 
   const handleNewAttempt = () => {
-    // In a real application, this would open the Stackblitz WebContainer
-    console.log("Opening Stackblitz WebContainer for a new attempt");
+    //navigate to assignments page
+    navigate("/assignments");
   };
 
   return (
