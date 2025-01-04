@@ -27,6 +27,7 @@ export const stack: Stack[] = [
           dependencies: {
             react: "^18.0.0",
             "react-dom": "^18.0.0",
+            express: "^4.18.0", // Moved express here in the package.json
           },
           devDependencies: {
             vite: "^4.0.0",
@@ -69,32 +70,18 @@ export const stack: Stack[] = [
       "src/index.html": `
         <!DOCTYPE html>
         <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>React App</title>
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>React App</title>
+          </head>
+          <body>
+            <div id="root"></div>
+          </body>
         </html>
       `,
     },
-    dependencies: {
-      express: "^4.18.0",
-    },
-  },
-  {
-    id: 2,
-    name: "React + Vitest",
-    title: "Frontend React with Vitest",
-    description: "A React template with Vitest for unit testing",
-    files: {
-      // Existing files for stack[1]
-    },
-    dependencies: {
-      // Existing dependencies for stack[1]
-    },
+    dependencies: {}, // Empty now, dependencies are moved to package.json
   },
   {
     id: 2,

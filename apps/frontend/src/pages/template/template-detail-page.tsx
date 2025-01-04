@@ -1,23 +1,37 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import sdk from "@stackblitz/sdk";
+import CodeContainer from "../assignments/code-container";
+import { useMemo } from "react";
 
 interface Template {
   id: number;
   name: string;
   description: string;
   bucketUrl: string;
-  files?: Record<string, string>;
+  files: { [key: string]: string };
   createdAt: string;
   updatedAt: string;
 }
 
+interface CodeContainerProps {
+  project: {
+    title: string;
+    description: string;
+    template?: number;
+    templateId?: number;
+    files: { [key: string]: string };
+    dependencies: { [key: string]: string };
+    height?: number;
+    width?: string;
+  };
+}
+
 function TemplateDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>(); // Add type safety to useParams
   const navigate = useNavigate();
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,16 +50,22 @@ function TemplateDetailPage() {
         const response = await fetch(
           `http://localhost:3000/api/templates/getTemplate/${id}`
         );
-        const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch template");
+          const data = await response.json().catch(() => ({}));
+          throw new Error(
+            data.message || `Failed to fetch template: ${response.statusText}`
+          );
         }
 
-        const templateData = data.template[0];
-        console.log("Received template data:", templateData); // Debug log
+        const data = await response.json();
+        const fetchedTemplate = data.template?.[0];
 
-        setTemplate(templateData);
+        if (!fetchedTemplate) {
+          throw new Error("Template not found");
+        }
+
+        setTemplate(fetchedTemplate);
       } catch (err) {
         console.error("Error fetching template:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -57,27 +77,18 @@ function TemplateDetailPage() {
     fetchTemplate();
   }, [id]);
 
-  useEffect(() => {
-    if (template?.files) {
-      sdk.embedProject(
-        "stackblitz-container", // ID of the div to embed the IDE
-        {
-          files: template.files,
-          title: template.name,
-          description: template.description || "",
-          template: "javascript",
-          dependencies: {
-            react: "^17.0.0",
-            "react-dom": "^17.0.0",
-          },
-        },
-        {
-          height: 600,
-          width: "100%",
-        }
-      );
+  // Extract dependencies from package.json if it exists
+  const dependencies = useMemo(() => {
+    if (!template?.files["/package.json"]) return {};
+
+    try {
+      const packageJson = JSON.parse(template.files["/package.json"]);
+      return packageJson.dependencies || {};
+    } catch (err) {
+      console.warn("Failed to parse package.json dependencies:", err);
+      return {};
     }
-  }, [template]);
+  }, [template?.files]);
 
   const handleBackClick = () => {
     navigate("/templates");
@@ -129,53 +140,17 @@ function TemplateDetailPage() {
         )}
       </div>
 
-      <div>
-        <div className="flex gap-2 mt-2">
-          <span className="px-3 py-1 bg-blue-100 text-blue-600 text-sm font-medium rounded-full">
-            React
-          </span>
-          <span className="px-3 py-1 bg-green-100 text-green-600 text-sm font-medium rounded-full">
-            tailwindcss
-          </span>
-          <span className="px-3 py-1 bg-yellow-100 text-yellow-600 text-sm font-medium rounded-full">
-            Vitest
-          </span>
-          <span className="px-3 py-1 bg-red-100 text-red-600 text-sm font-medium rounded-full">
-            Jasmine
-          </span>
-        </div>
+      <div className="mt-6 border rounded-md min-h-[600px]">
+        <CodeContainer
+          project={{
+            title: template.name,
+            description: template.description,
+            templateId: parseInt(id),
+            files: template.files,
+            dependencies,
+          }}
+        />
       </div>
-
-      <div className="space-y-2 text-sm text-gray-600">
-        <p>Created: {new Date(template.createdAt).toLocaleString()}</p>
-        <p>Last Updated: {new Date(template.updatedAt).toLocaleString()}</p>
-      </div>
-
-      {template.files && (
-        <div id="stackblitz-container" className="mt-6 border rounded-md"></div>
-      )}
-
-      {/* Debug info */}
-      <div className="mt-6 p-4 bg-gray-100 rounded">
-        <h2 className="text-lg font-semibold mb-2">Debug Info:</h2>
-        <pre className="whitespace-pre-wrap text-sm">
-          {JSON.stringify(
-            {
-              templateId: template.id,
-              files: template.files,
-              bucketUrl: template.bucketUrl,
-            },
-            null,
-            2
-          )}
-        </pre>
-      </div>
-      <Button
-        onClick={() => console.log("Save template clicked")}
-        className="mt-4"
-      >
-        Save Template
-      </Button>
     </div>
   );
 }

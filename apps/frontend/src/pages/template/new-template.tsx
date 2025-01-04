@@ -61,7 +61,7 @@ function NewTemplate() {
     }
   };
 
-  const handleSelectStack = (stackId: string) => {
+  const handleSelectStack = (stackId: number) => {
     const template = stack.find((item) => item.id === stackId);
     if (template) {
       setSelectedTemplate(template);
@@ -118,7 +118,7 @@ function NewTemplate() {
                 <Label htmlFor="dependencies">Tech Stack</Label>
                 <div className="space-y-1">
                   <Select
-                    onValueChange={(value) => handleSelectStack(value)}
+                    onValueChange={(value) => handleSelectStack(Number(value))}
                     defaultValue=""
                   >
                     <SelectTrigger>
@@ -126,7 +126,10 @@ function NewTemplate() {
                     </SelectTrigger>
                     <SelectContent>
                       {stack.map((template) => (
-                        <SelectItem key={template.id} value={template.id}>
+                        <SelectItem
+                          key={template.id}
+                          value={template.id.toString()}
+                        >
                           {template.title}
                         </SelectItem>
                       ))}
@@ -144,7 +147,7 @@ function NewTemplate() {
                     description: description || "New template description",
                     template: selectedTemplate.id,
                     files: selectedTemplate.files || {},
-                    dependencies: selectedTemplate.dependencies || {},
+                    dependencies: selectedTemplate?.dependencies || {},
                   }}
                 />
               ) : (
