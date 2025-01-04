@@ -149,13 +149,23 @@ function AssignmentsList() {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/assignments/${assignment.id}/attempt`}>
+                    <Link
+                      to={
+                        assignment.status !== "archived"
+                          ? `/assignments/${assignment.id}/attempt`
+                          : "#"
+                      }
+                    >
                       <Button
                         variant="secondary"
-                        className={`${getAttemptButtonStyles(
-                          assignment.status
-                        )}`}
-                        disabled={assignment.status === "archived"} // Disable button if archived
+                        className={`${getAttemptButtonStyles(assignment.status)}`}
+                        disabled={assignment.status === "archived"}
+                        onClick={(e) => {
+                          // Prevent navigation if the button is disabled
+                          if (assignment.status === "archived") {
+                            e.preventDefault();
+                          }
+                        }}
                       >
                         Attempt
                       </Button>
