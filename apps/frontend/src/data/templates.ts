@@ -27,11 +27,12 @@ export const stack: Stack[] = [
           dependencies: {
             react: "^18.0.0",
             "react-dom": "^18.0.0",
-            express: "^4.18.0", // Moved express here in the package.json
+            express: "^4.18.0",
           },
           devDependencies: {
             vite: "^4.0.0",
-            vitest: "^0.35.0",
+            vitest: "^2.1.8",
+            "@vitejs/plugin-react": "^3.0.0",
           },
         },
         null,
@@ -40,31 +41,37 @@ export const stack: Stack[] = [
       "index.js": `
         const express = require('express');
         const app = express();
-
+  
         app.get('/', (req, res) => {
           res.send('Hello from Node.js!');
         });
-
+  
         app.listen(3000, () => {
           console.log('Server is running on http://localhost:3000');
         });
       `,
       "vite.config.js": `
         import { defineConfig } from 'vite';
-
+        import react from '@vitejs/plugin-react';
+  
         export default defineConfig({
+          plugins: [react()],
           test: {
             globals: true,
-            environment: 'node',
+            environment: 'jsdom',
+            setupFiles: './vitest.setup.js',
           },
         });
+      `,
+      "vitest.setup.js": `
+        import '@testing-library/jest-dom';
       `,
       "src/main.jsx": `
         import React from 'react';
         import ReactDOM from 'react-dom';
-
+  
         const App = () => <h1>Hello from React!</h1>;
-
+  
         ReactDOM.render(<App />, document.getElementById('root'));
       `,
       "src/index.html": `
@@ -80,8 +87,54 @@ export const stack: Stack[] = [
           </body>
         </html>
       `,
+      "src/App.jsx": `
+        import React from 'react';
+  
+        const App = () => {
+          return <h1>Hello from React App Component!</h1>;
+        };
+  
+        export default App;
+      `,
+      "src/App.spec.js": `
+        import { render, screen } from '@testing-library/react';
+        import App from './App';
+  
+        describe('App Component', () => {
+          test('renders the correct heading', () => {
+            render(<App />);
+            const heading = screen.getByText(/Hello from React App Component!/i);
+            expect(heading).toBeInTheDocument();
+          });
+        });
+      `,
+      "README.md": `
+        # React + Node + Vitest Project
+  
+        This is a full-stack sample project using React for the frontend, Node.js for the backend, and Vitest for testing.
+  
+        ## Installation
+        Run the following commands to set up the project:
+  
+        \`\`\`bash
+        npm install
+        npm run dev # To start the Vite development server
+        npm run start # To start the Node.js server
+        npm run test # To run tests using Vitest
+        \`\`\`
+  
+        ## File Structure
+        - **index.js**: Node.js backend.
+        - **src**: Frontend React application.
+        - **vitest.setup.js**: Vitest setup file.
+        - **src/App.spec.js**: Vitest test file for the App component.
+        - **vite.config.js**: Vite configuration file.
+  
+        ## Testing
+        The project uses [Vitest](https://vitest.dev/) for unit testing. All tests are located in \`src/App.spec.js\`.
+      `,
     },
-    dependencies: {}, // Empty now, dependencies are moved to package.json
+    dependencies: {}, // Dependencies are in package.json
   },
   {
     id: 2,

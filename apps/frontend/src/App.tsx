@@ -6,7 +6,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Assignments from "./pages/assignments/assignments-list";
-import AssignmentAttempts from "./pages/assignment-attempts";
+import ListAllAttempts from "./pages/attempts";
 import AssignmentDetailPage from "./pages/assignments/assignment-detail-page";
 import NewAssignment from "./pages/assignments/new-assignment";
 import Templates from "./pages/template/templates-list";
@@ -30,7 +30,7 @@ function App() {
           <Route path="/assignments" element={<Assignments />} />
           <Route path="/assignments/new" element={<NewAssignment />} />
           <Route path="/assignments/:id" element={<AssignmentDetailPage />} />
-          <Route path="/attempts/*" element={<AssignmentAttempts />} />
+          <Route path="/attempts" element={<ListAllAttempts />} />
           <Route
             path="/assignments/:id/attempt"
             element={<AttemptAssignment />}

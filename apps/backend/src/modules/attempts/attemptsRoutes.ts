@@ -89,7 +89,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const assignmentId = parseInt(req.params.assignmentId, 10);
-      const { files, userId } = req.body;
+      const { files } = req.body;
 
       // Validate assignmentId
       if (isNaN(assignmentId)) {
@@ -116,12 +116,7 @@ router.post(
       const [existingAttempt] = await db
         .select()
         .from(assignmentAttempts)
-        .where(
-          and(
-            eq(assignmentAttempts.assignmentId, assignmentId),
-            eq(assignmentAttempts.userId, userId)
-          )
-        )
+        .where(and(eq(assignmentAttempts.assignmentId, assignmentId)))
         .execute();
 
       if (existingAttempt) {
@@ -132,7 +127,7 @@ router.post(
       }
 
       // Generate object name and save file content in MinIO
-      const objectName = `attempt-${assignmentId}-${userId}-${Date.now()}.json`;
+      const objectName = `attempt-${assignmentId}-${Date.now()}.json`;
       const fileContent = JSON.stringify(files, null, 2);
       await minioClient.putObject(bucketName, objectName, fileContent);
 
@@ -148,7 +143,7 @@ router.post(
         .insert(assignmentAttempts)
         .values({
           assignmentId,
-          userId,
+          userId: 1, // Hardcoded for now
           status: "submitted",
           bucketUrl: presignedUrl,
           createdAt: new Date(),
