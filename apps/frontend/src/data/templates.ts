@@ -14,127 +14,211 @@ export const stack: Stack[] = [
     title: "React + Node + Vitest Project",
     description: "A sample project using React, Node.js, and Vitest.",
     files: {
-      "package.json": JSON.stringify(
-        {
-          name: "react-node-vitest",
-          version: "1.0.0",
-          main: "index.js",
-          scripts: {
-            start: "node index.js",
-            test: "vitest",
-            dev: "vite",
-          },
-          dependencies: {
-            react: "^18.0.0",
-            "react-dom": "^18.0.0",
-            express: "^4.18.0",
-          },
-          devDependencies: {
-            vite: "^4.0.0",
-            vitest: "^2.1.8",
-            "@vitejs/plugin-react": "^3.0.0",
-          },
-        },
-        null,
-        2
-      ),
-      "index.js": `
-        const express = require('express');
-        const app = express();
-  
-        app.get('/', (req, res) => {
-          res.send('Hello from Node.js!');
-        });
-  
-        app.listen(3000, () => {
-          console.log('Server is running on http://localhost:3000');
-        });
+      ".gitignore": `
+        # Logs
+        logs
+        *.log
+        npm-debug.log*
+        yarn-debug.log*
+        yarn-error.log*
+        pnpm-debug.log*
+        lerna-debug.log*
+        
+        node_modules
+        dist
+        dist-ssr
+        *.local
+        
+        # Editor directories and files
+        .vscode/*
+        !.vscode/extensions.json
+        .idea
+        .DS_Store
+        *.suo
+        *.ntvs*
+        *.njsproj
+        *.sln
+        *.sw?
       `,
-      "vite.config.js": `
-        import { defineConfig } from 'vite';
-        import react from '@vitejs/plugin-react';
-  
-        export default defineConfig({
-          plugins: [react()],
-          test: {
-            globals: true,
-            environment: 'jsdom',
-            setupFiles: './vitest.setup.js',
+      "eslint.config.js": `
+        import js from '@eslint/js'
+        import globals from 'globals'
+        import reactHooks from 'eslint-plugin-react-hooks'
+        import reactRefresh from 'eslint-plugin-react-refresh'
+        import tseslint from 'typescript-eslint'
+    
+        export default tseslint.config(
+          { ignores: ['dist'] },
+          {
+            extends: [js.configs.recommended, ...tseslint.configs.recommended],
+            files: ['**/*.{ts,tsx}'],
+            languageOptions: {
+              ecmaVersion: 2020,
+              globals: globals.browser,
+            },
+            plugins: {
+              'react-hooks': reactHooks,
+              'react-refresh': reactRefresh,
+            },
+            rules: {
+              ...reactHooks.configs.recommended.rules,
+              'react-refresh/only-export-components': [
+                'warn',
+                { allowConstantExport: true },
+              ],
+            },
           },
-        });
+        )
       `,
-      "vitest.setup.js": `
-        import '@testing-library/jest-dom';
-      `,
-      "src/main.jsx": `
-        import React from 'react';
-        import ReactDOM from 'react-dom';
-  
-        const App = () => <h1>Hello from React!</h1>;
-  
-        ReactDOM.render(<App />, document.getElementById('root'));
-      `,
-      "src/index.html": `
-        <!DOCTYPE html>
+      "index.html": `
+        <!doctype html>
         <html lang="en">
           <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>React App</title>
+            <meta charset="UTF-8" />
+            <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Vite + React + TS</title>
           </head>
           <body>
             <div id="root"></div>
+            <script type="module" src="/src/main.tsx"></script>
           </body>
         </html>
       `,
-      "src/App.jsx": `
-        import React from 'react';
-  
-        const App = () => {
-          return <h1>Hello from React App Component!</h1>;
-        };
-  
+      "package.json": `{
+        "name": "vite-project",
+        "private": true,
+        "version": "0.0.0",
+        "type": "module",
+        "scripts": {
+          "dev": "vite",
+          "build": "tsc -b && vite build",
+          "lint": "eslint .",
+          "preview": "vite preview",
+          "test": "vitest"
+        },
+        "dependencies": {
+          "react": "^18.3.1",
+          "react-dom": "^18.3.1"
+        },
+        "devDependencies": {
+          "@eslint/js": "^9.17.0",
+          "@testing-library/jest-dom": "^6.6.3",
+          "@testing-library/react": "^16.1.0",
+          "@testing-library/user-event": "^14.5.2",
+          "@types/react": "^18.3.18",
+          "@types/react-dom": "^18.3.5",
+          "@vitejs/plugin-react": "^4.3.4",
+          "@vitejs/plugin-react-swc": "^3.5.0",
+          "eslint": "^9.17.0",
+          "eslint-plugin-react-hooks": "^5.0.0",
+          "eslint-plugin-react-refresh": "^0.4.16",
+          "globals": "^15.14.0",
+          "jsdom": "^25.0.1",
+          "typescript": "~5.6.2",
+          "typescript-eslint": "^8.18.2",
+          "vite": "^6.0.5",
+          "vitest": "^2.1.8"
+        }
+      }`,
+      "src/App.tsx": `
+        import React, { useState } from 'react';
+    
+        function App() {
+          const [count, setCount] = useState(0);
+    
+          return (
+            <div>
+              <h1>React Counter</h1>
+              <p>Count: {count}</p>
+              <button onClick={() => setCount(count + 1)}>Increment</button>
+            </div>
+          );
+        }
+    
         export default App;
       `,
-      "src/App.spec.js": `
-        import { render, screen } from '@testing-library/react';
-        import App from './App';
-  
-        describe('App Component', () => {
-          test('renders the correct heading', () => {
-            render(<App />);
-            const heading = screen.getByText(/Hello from React App Component!/i);
-            expect(heading).toBeInTheDocument();
-          });
+      "src/main.tsx": `
+        import { StrictMode } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import App from './App.tsx';
+    
+        createRoot(document.getElementById('root')!).render(
+          <StrictMode>
+            <App />
+          </StrictMode>
+        );
+      `,
+      "src/vite-env.d.ts": `
+        /// <reference types="vite/client" />
+      `,
+      "tsconfig.app.json": `{
+        "compilerOptions": {
+          "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+          "target": "ES2020",
+          "useDefineForClassFields": true,
+          "lib": ["ES2020", "DOM", "DOM.Iterable"],
+          "module": "ESNext",
+          "skipLibCheck": true,
+          "moduleResolution": "bundler",
+          "allowImportingTsExtensions": true,
+          "isolatedModules": true,
+          "moduleDetection": "force",
+          "noEmit": true,
+          "jsx": "react-jsx",
+          "strict": true
+        },
+        "include": ["src"]
+      }`,
+      "vite.config.mts": `
+        import { defineConfig } from 'vite';
+        import react from '@vitejs/plugin-react-swc';
+    
+        export default defineConfig({
+          plugins: [react()],
         });
       `,
-      "README.md": `
-        # React + Node + Vitest Project
-  
-        This is a full-stack sample project using React for the frontend, Node.js for the backend, and Vitest for testing.
-  
-        ## Installation
-        Run the following commands to set up the project:
-  
-        \`\`\`bash
-        npm install
-        npm run dev # To start the Vite development server
-        npm run start # To start the Node.js server
-        npm run test # To run tests using Vitest
-        \`\`\`
-  
-        ## File Structure
-        - **index.js**: Node.js backend.
-        - **src**: Frontend React application.
-        - **vitest.setup.js**: Vitest setup file.
-        - **src/App.spec.js**: Vitest test file for the App component.
-        - **vite.config.js**: Vite configuration file.
-  
-        ## Testing
-        The project uses [Vitest](https://vitest.dev/) for unit testing. All tests are located in \`src/App.spec.js\`.
+      "vitest.config.mts": `
+        import { defineConfig, mergeConfig } from 'vitest/config';
+        import viteConfig from './vite.config.mts';
+    
+        export default mergeConfig(
+          viteConfig,
+          defineConfig({
+            test: {
+              environment: 'jsdom',
+              globals: true,
+              setupFiles: './src/setupTests.ts',
+              reporters: ['json', 'default'],
+              outputFile: './test-output.json',
+            },
+          })
+        );
       `,
+      "src/setupTests.ts": `import '@testing-library/jest-dom';`,
+      "src/App.test.tsx": `
+       import { expect } from 'vitest';
+       import { render, screen, fireEvent } from '@testing-library/react';
+       import App from './App';
+
+       test('renders counter and increments', () => {
+        render(<App />);
+        const countElement = screen.getByText(/Count: 0/i);
+        expect(countElement).toBeInTheDocument();
+
+        const button = screen.getByText(/Increment/i);
+        fireEvent.click(button);
+        expect(screen.getByText(/Count: 1/i)).toBeInTheDocument();
+      });
+
+       `,
     },
-    dependencies: {}, // Dependencies are in package.json
+    dependencies: {
+      react: "^18.0.0",
+      "react-dom": "^18.0.0",
+      vitest: "^0.22.1",
+      "@testing-library/react": "^12.1.2",
+    },
   },
   {
     id: 2,
