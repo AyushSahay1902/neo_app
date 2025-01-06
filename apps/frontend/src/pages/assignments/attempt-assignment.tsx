@@ -49,14 +49,12 @@ function AttemptAssignment() {
               Accept: "application/json",
               "Content-Type": "application/json",
             },
-            credentials: "include", // Include if you're using cookies
           }
         );
 
         if (!response.ok) {
           throw new Error(`Failed to fetch assignment: ${response.statusText}`);
         }
-
         const assignmentData: AssignmentResponse = await response.json();
         setAssignment(assignmentData.data);
       } catch (err) {
@@ -124,6 +122,10 @@ function AttemptAssignment() {
         {assignment.description && (
           <p className="mt-2 text-gray-600">{assignment.description}</p>
         )}
+        <div id="code-editor" className="mt-4 h-96 border border-gray-200">
+          {/* Code editor will be rendered here */}
+          BucketUrl: {assignment.bucketUrl}
+        </div>
         <p className="mt-4 text-sm text-gray-500">
           Created At: {new Date(assignment.createdAt).toLocaleString()}
         </p>
